@@ -3,6 +3,8 @@ module com.example.hmeflights {
     requires javafx.fxml;
     requires javafx.web;
 
+
+    requires org.neo4j.driver;
     requires org.controlsfx.controls;
     requires com.dlsc.formsfx;
     requires net.synedra.validatorfx;
