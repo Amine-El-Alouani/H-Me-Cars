@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GraphDatabaseSupport.DataSourcesState">
+    <option name="containerV1">
+      <DataSourceContainerV1>
+        <option name="dataSources">
+          <list>
+            <DataSourceV1>
+              <option name="uuid" value="964be0cb-90d3-47a5-a246-9b2ea529a1f2" />
+              <option name="name" value="H-me Flights Database" />
+              <option name="dataSourceType" value="NEO4J_BOLT" />
+              <option name="configuration">
+                <map>
+                  <entry key="authType" value="User &amp; Password" />
+                  <entry key="database" value="neo4j" />
+                  <entry key="host" value="f4af5ebe.databases.neo4j.io" />
+                  <entry key="password" value="Q_yHMPUVsdfti24_CgskB_U0BDCCJp1Fv6lzky936Pc" />
+                  <entry key="port" value="7687" />
+                  <entry key="protocol" value="neo4j+s" />
+                  <entry key="user" value="neo4j" />
+                </map>
+              </option>
+            </DataSourceV1>
+          </list>
+        </option>
+      </DataSourceContainerV1>
+    </option>
+  </component>
+</project>
