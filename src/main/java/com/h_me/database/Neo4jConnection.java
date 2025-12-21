@@ -3,10 +3,14 @@ package com.h_me.database;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
-import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Neo4jConnection {
+    // 1. Create a static logger (Better than System.out/err)
+    private static final Logger LOGGER = Logger.getLogger(Neo4jConnection.class.getName());
+
     public static void main(String[] args) {
         String uri = "neo4j+s://f4af5ebe.databases.neo4j.io";
         String user = "neo4j";
@@ -17,16 +21,16 @@ public class Neo4jConnection {
             try (Session session = driver.session()) {
 
                 String greeting = session.run("RETURN 'Hello, Neo4j!' AS message")
-                        .single()       // Get the first record
-                        .get("message") // Get the value of "message"
-                        .asString();    // Convert it to a Java String
+                        .single()
+                        .get("message")
+                        .asString();
 
-                System.out.println(greeting);
+                LOGGER.info("Received from Database: " + greeting);
             }
 
         } catch (Exception e) {
-            System.err.println("Connection failed: " + e.getMessage());
-            e.printStackTrace();
+            // 2. Log the exception properly with a severity level
+            LOGGER.log(Level.SEVERE, "Database connection failed", e);
         }
     }
 }
