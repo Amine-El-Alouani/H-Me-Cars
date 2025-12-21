@@ -10,6 +10,7 @@ module com.example.hmeflights {
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
+    requires org.neo4j.driver;
 
     opens com.example.hmeflights to javafx.fxml;
     exports com.example.hmeflights;
