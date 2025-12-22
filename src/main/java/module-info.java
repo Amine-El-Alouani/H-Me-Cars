@@ -12,6 +12,7 @@ module com.example.hmeflights {
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
+    requires static lombok;
 
     opens com.example.hmeflights to javafx.fxml;
     exports com.example.hmeflights;
