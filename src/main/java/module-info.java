@@ -4,7 +4,12 @@ module com.example.hmecars {
     requires javafx.web;
 
 
-    requires org.neo4j.driver;
+
+    requires java.sql;
+    requires org.postgresql.jdbc;
+    opens com.h_me.carsapp to javafx.fxml;
+    opens com.h_me.carsapp.controller to javafx.fxml;
+    opens com.h_me.carsapp.model to javafx.base;
     requires org.controlsfx.controls;
     requires com.dlsc.formsfx;
     requires net.synedra.validatorfx;
