@@ -1,4 +1,4 @@
-package com.example.hmeflights;
+package com.example.hmecars;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;

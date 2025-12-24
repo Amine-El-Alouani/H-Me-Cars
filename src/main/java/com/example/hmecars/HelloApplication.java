@@ -1,4 +1,4 @@
-package com.example.hmeflights;
+package com.example.hmecars;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;

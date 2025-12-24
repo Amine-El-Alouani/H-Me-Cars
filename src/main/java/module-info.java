@@ -1,4 +1,4 @@
-module com.example.hmeflights {
+module com.example.hmecars {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.web;
@@ -14,6 +14,6 @@ module com.example.hmeflights {
     requires com.almasb.fxgl.all;
     requires static lombok;
 
-    opens com.example.hmeflights to javafx.fxml;
-    exports com.example.hmeflights;
+    opens com.example.hmecars to javafx.fxml;
+    exports com.example.hmecars;
 }

@@ -1,4 +1,4 @@
-package com.h_me.flightapp.model;
+package com.h_me.carsapp.model;
 
 import lombok.Data;
 import lombok.AllArgsConstructor;
