@@ -37,3 +37,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Local Configuration ###
+# Uncomment the line below if you want to ignore this folder
+# utils/postgresconnection/
