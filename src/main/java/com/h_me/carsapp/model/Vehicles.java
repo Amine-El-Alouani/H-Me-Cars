@@ -4,16 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class Airline {
-    private int id;
+public class Vehicles {
+    private int vehicleID;
     private String name;
-    private String alias;
-    private String iata;
-    private String country;
-    private boolean active;
+    private String category;
+    private double pricePurchase;
+    private double priceRental;
+    private String status;
 }

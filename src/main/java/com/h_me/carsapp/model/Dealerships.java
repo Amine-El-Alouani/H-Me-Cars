@@ -8,10 +8,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class Route {
-    private String flightNum;
-    private int airlineID;
-    private int sourceID;
-    private int destID;
-    private String Equipement;
+public class Dealerships {
+    private int dealershipID;
+    private String anme;
+    private String city;
+    private double latitude;
+    private double longitude;
 }
