@@ -21,4 +21,5 @@ module com.example.hmecars {
 
     opens com.example.hmecars to javafx.fxml;
     exports com.example.hmecars;
+    exports com.h_me.carsapp;
 }

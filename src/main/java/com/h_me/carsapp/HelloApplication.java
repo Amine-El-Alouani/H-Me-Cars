@@ -1,7 +1,7 @@
-package com.example.hmecars; // Keep your package name
+package com.h_me.carsapp; // <--- 1. CHANGE THIS to match the new folder
 
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader; // <--- If this is still red, check Step 1 again!
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -10,11 +10,12 @@ import java.io.IOException;
 public class HelloApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
-        // Note the path starts with '/' to look in resources
-        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("/com/h_me/carsapp/view/dashboard.fxml"));
+        // 2. CHANGE THIS PATH
+        // It looks in: src/main/resources/com/h_me/carsapp/view/dashboard.fxml
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/h_me/carsapp/view/dashboard.fxml"));
 
         Scene scene = new Scene(fxmlLoader.load(), 900, 600);
-        stage.setTitle("H-Me Cars Inventory");
+        stage.setTitle("H-Me Cars");
         stage.setScene(scene);
         stage.show();
     }

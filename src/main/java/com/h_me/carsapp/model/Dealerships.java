@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 public class Dealerships {
     private int dealershipID;
-    private String anme;
+    private String name;
     private String city;
     private double latitude;
     private double longitude;
