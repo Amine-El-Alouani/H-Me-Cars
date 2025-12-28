@@ -8,11 +8,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class Vehicles {
+public class Vehicle {
     private int vehicleID;
     private String name;
     private String category;
     private double pricePurchase;
     private double priceRental;
     private String status;
+    private int dealershipID;
+    private int manufactureID;
 }
