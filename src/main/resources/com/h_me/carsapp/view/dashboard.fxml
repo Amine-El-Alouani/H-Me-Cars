@@ -39,6 +39,7 @@
 
             <Button text="Rent Selected Car" onAction="#handleRent"
                     style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold;"/>
+            <Button text="Locate Dealerships" onAction="#goToDealerships"/>
         </HBox>
     </bottom>
 

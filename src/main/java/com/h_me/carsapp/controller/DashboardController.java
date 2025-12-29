@@ -6,8 +6,11 @@ import com.h_me.carsapp.service.RentalService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+
+import java.io.IOException;
 import java.time.temporal.ChronoUnit;
 import javafx.scene.control.Alert;
 
@@ -112,4 +115,14 @@ public class DashboardController {
         alert.setContentText(content);
         alert.showAndWait();
     }
+
+    @FXML
+    public void goToDealerships(javafx.event.ActionEvent event) throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/h_me/carsapp/view/dealership-view.fxml"));
+        javafx.scene.Scene scene = new javafx.scene.Scene(fxmlLoader.load(), 900, 600);
+        javafx.stage.Stage stage = (javafx.stage.Stage)((javafx.scene.Node)event.getSource()).getScene().getWindow();
+        stage.setScene(scene);
+        stage.show();
+    }
 }
+
