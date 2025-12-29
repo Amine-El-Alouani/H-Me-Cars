@@ -10,8 +10,6 @@ import java.io.IOException;
 public class HelloApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
-        // 2. CHANGE THIS PATH
-        // It looks in: src/main/resources/com/h_me/carsapp/view/dashboard.fxml
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/h_me/carsapp/view/dashboard.fxml"));
 
         Scene scene = new Scene(fxmlLoader.load(), 900, 600);

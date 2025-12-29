@@ -19,7 +19,6 @@ public class DealershipDAO {
 
             while (rs.next()) {
                 Dealerships d = new Dealerships();
-                // Map DB columns (lowercase) to Java fields
                 d.setDealershipID(rs.getInt("dealershipid")); // DB: dealershipid
                 d.setName(rs.getString("name"));
                 d.setCity(rs.getString("city"));
@@ -33,12 +32,10 @@ public class DealershipDAO {
         return list;
     }
 
-    // "Find Nearby" Feature using Haversine Formula
     public List<Dealerships> findNearby(double userLat, double userLon, double radiusKm) {
         List<Dealerships> list = new ArrayList<>();
 
-        // This SQL calculates distance in KM.
-        // Note: Using 'latitude' and 'longitude' columns from your DB.
+
         String sql = "SELECT *, (6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance " +
                 "FROM dealerships " +
                 "WHERE (6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) < ? " +
@@ -47,7 +44,6 @@ public class DealershipDAO {
         try (Connection conn = PostgresConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            // Fill in the '?' placeholders with user coordinates
             stmt.setDouble(1, userLat);
             stmt.setDouble(2, userLon);
             stmt.setDouble(3, userLat);

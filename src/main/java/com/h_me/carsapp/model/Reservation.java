@@ -17,7 +17,7 @@ public class Reservation {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private int totalCost;
-    private String vehicleID;
+    private int vehicleID;
     private int userID;
 
 }

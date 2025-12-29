@@ -2,19 +2,20 @@ package com.h_me.carsapp.controller;
 
 import com.h_me.carsapp.dao.VehicleDAO;
 import com.h_me.carsapp.model.Vehicle;
+import com.h_me.carsapp.service.RentalService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import java.time.temporal.ChronoUnit;
+import javafx.scene.control.Alert;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class DashboardController {
 
-    // 1. Link to FXML Elements
     @FXML private TableView<Vehicle> vehicleTable;
     @FXML private TableColumn<Vehicle, String> colName;
     @FXML private TableColumn<Vehicle, String> colCategory;
@@ -22,27 +23,26 @@ public class DashboardController {
     @FXML private TableColumn<Vehicle, String> colStatus;
     @FXML private TextField searchField;
 
-    // 2. Data Tools
-    private VehicleDAO vehicleDAO;
-    private ObservableList<Vehicle> vehicleList; // Special list for JavaFX
+    @FXML private DatePicker startDatePicker;
+    @FXML private DatePicker endDatePicker;
 
-    // 3. Initialize (Runs automatically when screen opens)
+    private VehicleDAO vehicleDAO;
+    private RentalService rentalService;
+    private ObservableList<Vehicle> vehicleList;
+
     @FXML
     public void initialize() {
         vehicleDAO = new VehicleDAO();
+        rentalService = new RentalService();
 
-        // Setup Columns: Tell JavaFX which field in 'Vehicle' goes to which column
-        // These strings MUST match your Vehicle.java field names exactly!
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
         colCategory.setCellValueFactory(new PropertyValueFactory<>("category"));
         colPrice.setCellValueFactory(new PropertyValueFactory<>("priceRental"));
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
 
-        // Load data immediately
         loadData();
     }
 
-    // 4. Load Data from Postgres
     @FXML
     public void loadData() {
         List<Vehicle> data = vehicleDAO.getAllAvailableVehicles();
@@ -50,17 +50,66 @@ public class DashboardController {
         vehicleTable.setItems(vehicleList);
     }
 
-    // 5. Search Button Logic
     @FXML
     public void handleSearch() {
         String query = searchField.getText().toLowerCase();
-
-        // Filter the existing list locally (easier than SQL for small data)
         ObservableList<Vehicle> filteredList = vehicleList.filtered(v ->
                 v.getName().toLowerCase().contains(query) ||
                         v.getCategory().toLowerCase().contains(query)
         );
-
         vehicleTable.setItems(filteredList);
+    }
+
+    @FXML
+    public void handleRent() {
+        Vehicle selectedCar = vehicleTable.getSelectionModel().getSelectedItem();
+
+        if (selectedCar == null) {
+            showAlert("Error", "No car selected!", "Please click on a car in the table.");
+            return;
+        }
+
+        if (startDatePicker.getValue() == null || endDatePicker.getValue() == null) {
+            showAlert("Error", "Missing Dates", "Please select both start and end dates.");
+            return;
+        }
+
+        LocalDateTime start = startDatePicker.getValue().atStartOfDay();
+        LocalDateTime end = endDatePicker.getValue().atStartOfDay();
+
+        if (end.isBefore(start)) {
+            showAlert("Error", "Invalid Dates", "End date cannot be before start date.");
+            return;
+        }
+
+        long days = ChronoUnit.DAYS.between(start, end);
+        if (days < 1) days = 1; // Minimum 1 day
+        double estimatedCost = days * selectedCar.getPriceRental();
+
+        int fakeUserId = 1;
+        boolean success = rentalService.processRental(selectedCar, fakeUserId, start, end);
+
+        if (success) {
+            String message = String.format(
+                    "Car: %s\nDuration: %d Days\nTotal Price: %.2f MAD",
+                    selectedCar.getName(),
+                    days,
+                    estimatedCost
+            );
+
+            showAlert("Rental Successful", "Reservation Confirmed!", message);
+
+            loadData();
+        } else {
+            showAlert("Error", "Rental Failed", "Could not process transaction. The car might be unavailable.");
+        }
+    }
+
+    private void showAlert(String title, String header, String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 }

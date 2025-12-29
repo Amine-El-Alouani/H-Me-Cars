@@ -30,8 +30,15 @@
     </center>
 
     <bottom>
-        <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 10;">
-            <Button text="Rent Selected Car" style="-fx-background-color: #27ae60; -fx-text-fill: white;"/>
+        <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 10; -fx-background-color: #ecf0f1;">
+            <Label text="Start Date:"/>
+            <DatePicker fx:id="startDatePicker" prefWidth="120"/>
+
+            <Label text="End Date:"/>
+            <DatePicker fx:id="endDatePicker" prefWidth="120"/>
+
+            <Button text="Rent Selected Car" onAction="#handleRent"
+                    style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold;"/>
         </HBox>
     </bottom>
 

@@ -9,10 +9,9 @@ import java.util.List;
 
 public class VehicleDAO {
 
-    // 1. GET ALL AVAILABLE CARS
+
     public List<Vehicle> getAllAvailableVehicles() {
         List<Vehicle> list = new ArrayList<>();
-        // Use the EXACT column names from your screenshot
         String sql = "SELECT * FROM vehicles WHERE status = 'AVAILABLE'";
 
         try (Connection conn = PostgresConnection.getConnection();
@@ -39,10 +38,8 @@ public class VehicleDAO {
         return list;
     }
 
-    // 2. SEARCH BY LOCATION (Find cars at a specific dealership)
     public List<Vehicle> getVehiclesByDealership(int dealershipId) {
         List<Vehicle> list = new ArrayList<>();
-        // Note: DB column is 'dealershipid'
         String sql = "SELECT * FROM vehicles WHERE dealershipid = ? AND status = 'AVAILABLE'";
 
         try (Connection conn = PostgresConnection.getConnection();
@@ -69,9 +66,7 @@ public class VehicleDAO {
         return list;
     }
 
-    // 3. ADD VEHICLE
     public void addVehicle(Vehicle v) {
-        // Corrected column names for INSERT
         String sql = "INSERT INTO vehicles (model, category, pricepurchase, pricerental, status, dealershipid, manufacturerid) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = PostgresConnection.getConnection();
@@ -86,7 +81,22 @@ public class VehicleDAO {
             stmt.setInt(7, v.getManufactureID());
 
             stmt.executeUpdate();
-            System.out.println("✅ Vehicle added to database.");
+            System.out.println("Vehicle added to database.");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateVehicleStatus(int vehicleId, String newStatus) {
+        String sql = "UPDATE vehicles SET status = ? WHERE vehicleid = ?";
+
+        try (Connection conn = PostgresConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, newStatus);
+            stmt.setInt(2, vehicleId);
+            stmt.executeUpdate();
 
         } catch (SQLException e) {
             e.printStackTrace();
