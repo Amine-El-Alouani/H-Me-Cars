@@ -1,5 +1,4 @@
-package com.h_me.carsapp; // <--- 1. CHANGE THIS to match the new folder
-
+package com.h_me.carsapp;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;

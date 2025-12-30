@@ -32,7 +32,6 @@ public class RentalService {
             return false;
         }
 
-        // 2. Calculate Duration and Cost
         long days = ChronoUnit.DAYS.between(startDate, endDate);
         if (days < 1) days = 1; // Minimum 1 day rental
 
