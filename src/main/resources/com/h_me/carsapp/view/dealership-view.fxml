@@ -7,28 +7,40 @@
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.h_me.carsapp.controller.DealershipController"
-            prefHeight="600.0" prefWidth="900.0">
+            prefHeight="600.0" prefWidth="1000.0">
 
     <top>
-        <HBox spacing="10" style="-fx-background-color: #2c3e50; -fx-padding: 15;">
-            <Button text="← Back" onAction="#goBack" style="-fx-background-color: #95a5a6;"/>
-            <Label text="Dealership Locator" textFill="WHITE" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
-        </HBox>
+        <VBox>
+            <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-background-color: #2c3e50; -fx-padding: 15;">
+                <Button text="← Back to Cars" onAction="#goBack" style="-fx-background-color: #95a5a6; -fx-text-fill: white;"/>
+                <Label text="Dealership Locator" textFill="WHITE" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+            </HBox>
+
+            <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10; -fx-background-color: #ecf0f1;">
+                <Label text="My Lat:"/>
+                <TextField fx:id="latField" text="33.5731" prefWidth="100"/>
+                <Label text="My Lon:"/>
+                <TextField fx:id="lonField" text="-7.5898" prefWidth="100"/>
+                <Button text="Find Nearest (50km)" onAction="#handleSearchNearby"/>
+                <Button text="Show All" onAction="#loadAllData"/>
+            </HBox>
+        </VBox>
     </top>
 
     <center>
-        <SplitPane dividerPositions="0.3"> <VBox spacing="5">
-            <Label text="Select a Dealership:" style="-fx-padding: 5; -fx-font-weight: bold;"/>
-            <TableView fx:id="dealerTable" VBox.vgrow="ALWAYS">
+        <SplitPane dividerPositions="0.4">
+            <TableView fx:id="dealerTable">
                 <columns>
-                    <TableColumn fx:id="colName" text="Name" prefWidth="150"/>
+                    <TableColumn fx:id="colName" text="Dealership Name" prefWidth="150"/>
                     <TableColumn fx:id="colCity" text="City" prefWidth="100"/>
+                    <TableColumn fx:id="colLat" text="Lat" prefWidth="80"/>
+                    <TableColumn fx:id="colLon" text="Lon" prefWidth="80"/>
                 </columns>
             </TableView>
-        </VBox>
 
-            <WebView fx:id="mapView"/>
-
+            <StackPane>
+                <WebView fx:id="mapWebView" minWidth="100" minHeight="100"/>
+            </StackPane>
         </SplitPane>
     </center>
 

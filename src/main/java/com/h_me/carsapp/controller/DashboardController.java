@@ -2,7 +2,7 @@ package com.h_me.carsapp.controller;
 
 import com.h_me.carsapp.dao.VehicleDAO;
 import com.h_me.carsapp.model.Vehicle;
-import com.h_me.carsapp.service.RentalService;
+import com.h_me.carsapp.service.ReservationService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -30,13 +30,13 @@ public class DashboardController {
     @FXML private DatePicker endDatePicker;
 
     private VehicleDAO vehicleDAO;
-    private RentalService rentalService;
+    private ReservationService reservationService; // Instance variable
     private ObservableList<Vehicle> vehicleList;
 
     @FXML
     public void initialize() {
         vehicleDAO = new VehicleDAO();
-        rentalService = new RentalService();
+        reservationService = new ReservationService(); // Initialized here
 
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
         colCategory.setCellValueFactory(new PropertyValueFactory<>("category"));
@@ -86,11 +86,15 @@ public class DashboardController {
         }
 
         long days = ChronoUnit.DAYS.between(start, end);
-        if (days < 1) days = 1; // Minimum 1 day
+        if (days < 1) days = 1;
         double estimatedCost = days * selectedCar.getPriceRental();
 
-        int fakeUserId = 1;
-        boolean success = rentalService.processRental(selectedCar, fakeUserId, start, end);
+        // Get Real User ID
+        com.h_me.carsapp.model.User currentUser = com.h_me.carsapp.utils.UserSession.getInstance().getUser();
+        int userId = Integer.parseInt(currentUser.getUserID());
+
+        // FIX IS HERE: Use 'reservationService' (instance), NOT 'ReservationService' (class)
+        boolean success = reservationService.processRental(selectedCar, userId, start, end);
 
         if (success) {
             String message = String.format(
@@ -101,7 +105,6 @@ public class DashboardController {
             );
 
             showAlert("Rental Successful", "Reservation Confirmed!", message);
-
             loadData();
         } else {
             showAlert("Error", "Rental Failed", "Could not process transaction. The car might be unavailable.");
@@ -125,4 +128,3 @@ public class DashboardController {
         stage.show();
     }
 }
-

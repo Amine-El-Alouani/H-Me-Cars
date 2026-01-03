@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.h_me.carsapp.controller.LoginController"
+      style="-fx-background-color: #ecf0f1;" prefWidth="400.0" prefHeight="400.0">
+
+    <padding><Insets top="20" right="40" bottom="20" left="40"/></padding>
+
+    <Label text="H-Me Login" textFill="#2c3e50">
+        <font><Font name="System Bold" size="24.0"/></font>
+    </Label>
+
+    <TextField fx:id="emailField" promptText="Email Address"/>
+    <PasswordField fx:id="passwordField" promptText="Password"/>
+
+    <Label fx:id="errorLabel" textFill="red"/>
+
+    <Button text="Login" onAction="#handleLogin"
+            style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold;"
+            maxWidth="Infinity"/>
+
+    <Hyperlink text="Don't have an account? Register" onAction="#goToRegister"/>
+
+</VBox>

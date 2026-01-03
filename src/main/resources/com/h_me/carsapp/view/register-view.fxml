@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.h_me.carsapp.controller.RegisterController"
+      style="-fx-background-color: #ecf0f1;" prefWidth="400.0" prefHeight="500.0">
+
+    <padding><Insets top="20" right="40" bottom="20" left="40"/></padding>
+
+    <Label text="Create Account" textFill="#2c3e50">
+        <font><Font name="System Bold" size="24.0"/></font>
+    </Label>
+
+    <TextField fx:id="firstNameField" promptText="First Name"/>
+    <TextField fx:id="lastNameField" promptText="Last Name"/>
+    <TextField fx:id="phoneField" promptText="Phone Number (Numeric)"/>
+    <TextField fx:id="emailField" promptText="Email Address"/>
+    <PasswordField fx:id="passwordField" promptText="Password"/>
+
+    <Button text="Register" onAction="#handleRegister"
+            style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold;"
+            maxWidth="Infinity"/>
+
+    <Button text="Back to Login" onAction="#goToLogin" style="-fx-background-color: transparent; -fx-text-fill: #2980b9;"/>
+
+</VBox>

@@ -8,21 +8,19 @@ import com.h_me.carsapp.model.Vehicle;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
-public class RentalService {
+public class ReservationService {
 
     private ReservationDAO reservationDAO;
     private VehicleDAO vehicleDAO;
 
-    public RentalService() {
+    public ReservationService() {
         this.reservationDAO = new ReservationDAO();
         this.vehicleDAO = new VehicleDAO();
     }
 
     /**
-     * Processes a rental transaction.
-     * 1. Calculates the total price (Days * Daily Rate).
-     * 2. Creates the Reservation in the DB.
-     * 3. Updates the Vehicle status to 'RENTED'.
+     * FIX: Removed 'static' keyword.
+     * Now this method can access 'reservationDAO' and 'vehicleDAO'.
      */
     public boolean processRental(Vehicle vehicle, int userId, LocalDateTime startDate, LocalDateTime endDate) {
 
@@ -47,9 +45,7 @@ public class RentalService {
 
         try {
             reservationDAO.createReservation(reservation);
-
             vehicleDAO.updateVehicleStatus(vehicle.getVehicleID(), "RENTED");
-
             System.out.println("Rental Successful! Total Cost: " + totalCost + " MAD");
             return true;
 
