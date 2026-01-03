@@ -70,4 +70,33 @@ public class ReservationDAO {
         }
         return list;
     }
+
+    public List<Reservation> getAllReservations() {
+        List<Reservation> list = new ArrayList<>();
+        String sql = "SELECT * FROM reservations"; // Get EVERYTHING
+
+        try (Connection conn = PostgresConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Reservation r = new Reservation();
+                r.setReservationID(rs.getInt("reservationid"));
+                r.setTypeRes(rs.getString("typeres"));
+                // Handle timestamps safely
+                if (rs.getTimestamp("startdate") != null)
+                    r.setStartDate(rs.getTimestamp("startdate").toLocalDateTime());
+                if (rs.getTimestamp("enddate") != null)
+                    r.setEndDate(rs.getTimestamp("enddate").toLocalDateTime());
+
+                r.setTotalCost(rs.getInt("totalcost"));
+                r.setVehicleID(rs.getInt("vehicleid"));
+                r.setUserID(rs.getInt("userid"));
+                list.add(r);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }

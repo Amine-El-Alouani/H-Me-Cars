@@ -102,4 +102,17 @@ public class VehicleDAO {
             e.printStackTrace();
         }
     }
+
+    public void deleteVehicle(int vehicleId) {
+        String sql = "DELETE FROM vehicles WHERE vehicleid = ?";
+        try (Connection conn = PostgresConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, vehicleId);
+            stmt.executeUpdate();
+            System.out.println("Vehicle deleted.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

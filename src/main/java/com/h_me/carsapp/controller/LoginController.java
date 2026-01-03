@@ -30,10 +30,19 @@ public class LoginController {
 
         if (user != null) {
             UserSession.setSession(user);
+
             try {
-                goToDashboard(event);
+                // --- NEW LOGIC: Check Role and Redirect ---
+                // Ensure your User model has the .getRole() method!
+                if ("ADMIN".equalsIgnoreCase(user.getRole())) {
+                    goToAdminDashboard(event);
+                } else {
+                    goToDashboard(event);
+                }
+
             } catch (IOException e) {
                 e.printStackTrace();
+                errorLabel.setText("Error loading dashboard.");
             }
         } else {
             errorLabel.setText("Invalid Email or Password");
@@ -55,6 +64,17 @@ public class LoginController {
         Scene scene = new Scene(fxmlLoader.load(), 900, 600);
         Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
         stage.setTitle("H-Me Cars Dashboard");
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    // --- NEW METHOD: Load Admin View ---
+    private void goToAdminDashboard(ActionEvent event) throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/h_me/carsapp/view/admin-view.fxml"));
+        // Admin view might need a slightly larger window
+        Scene scene = new Scene(fxmlLoader.load(), 1000, 600);
+        Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+        stage.setTitle("Admin Panel - H-Me Cars");
         stage.setScene(scene);
         stage.show();
     }

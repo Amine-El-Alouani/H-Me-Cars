@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.h_me.carsapp.controller.AdminController"
+            prefHeight="600.0" prefWidth="800.0">
+
+    <top>
+        <HBox style="-fx-background-color: #c0392b; -fx-padding: 15;" alignment="CENTER_LEFT" spacing="20">
+            <Label text="ADMIN DASHBOARD" textFill="WHITE" style="-fx-font-weight: bold; -fx-font-size: 18;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Logout" onAction="#handleLogout"/>
+        </HBox>
+    </top>
+
+    <center>
+        <TabPane>
+            <Tab text="Manage Cars" closable="false">
+                <VBox spacing="10" style="-fx-padding: 10;">
+                    <TableView fx:id="carTable" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="colCarId" text="ID" prefWidth="50"/>
+                            <TableColumn fx:id="colModel" text="Model" prefWidth="200"/>
+                            <TableColumn fx:id="colStatus" text="Status" prefWidth="100"/>
+                        </columns>
+                    </TableView>
+
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <TextField fx:id="modelField" promptText="Car Model"/>
+                        <TextField fx:id="categoryField" promptText="Category"/>
+                        <TextField fx:id="priceField" promptText="Price (MAD)"/>
+                        <Button text="Add Car" onAction="#handleAddCar" style="-fx-background-color: #27ae60; -fx-text-fill: white;"/>
+                        <Button text="Delete Selected" onAction="#handleDeleteCar" style="-fx-background-color: #e74c3c; -fx-text-fill: white;"/>
+                    </HBox>
+                </VBox>
+            </Tab>
+
+            <Tab text="All Reservations" closable="false">
+                <VBox style="-fx-padding: 10;">
+                    <TableView fx:id="resTable" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="colResId" text="Res ID" prefWidth="80"/>
+                            <TableColumn fx:id="colUserId" text="User ID" prefWidth="80"/>
+                            <TableColumn fx:id="colResCarId" text="Car ID" prefWidth="80"/>
+                            <TableColumn fx:id="colCost" text="Total Cost" prefWidth="100"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+            </Tab>
+        </TabPane>
+    </center>
+
+</BorderPane>

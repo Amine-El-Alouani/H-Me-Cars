@@ -24,6 +24,7 @@ public class UserDAO {
                 user.setLastName(rs.getString("lastname"));
                 user.setEmail(rs.getString("email"));
                 user.setPhoneNum(rs.getInt("phonenum"));
+                user.setRole(rs.getString("role"));
                 return user;
             }
         } catch (SQLException e) {
