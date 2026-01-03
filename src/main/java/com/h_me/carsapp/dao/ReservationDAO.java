@@ -4,76 +4,42 @@ import com.h_me.carsapp.model.Reservation;
 import com.h_me.carsapp.utils.PostgresConnection;
 
 import java.sql.*;
-import java.time.LocalDateTime; // Important for dates
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ReservationDAO {
 
-    public void createReservation(Reservation r) {
-        String sql = "INSERT INTO reservations (typeres, startdate, enddate, totalcost, vehicleid, userid) VALUES (?, ?, ?, ?, ?, ?)";
+    // 1. SMART CHECK
+    public boolean isCarAvailable(int vehicleId, LocalDateTime newStart, LocalDateTime newEnd) {
+        String sql = "SELECT COUNT(*) FROM reservations WHERE vehicleid = ? AND (startdate < ? AND enddate > ?)";
 
         try (Connection conn = PostgresConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, r.getTypeRes());
+            stmt.setInt(1, vehicleId);
+            stmt.setTimestamp(2, Timestamp.valueOf(newEnd));
+            stmt.setTimestamp(3, Timestamp.valueOf(newStart));
 
-            stmt.setTimestamp(2, Timestamp.valueOf(r.getStartDate()));
-
-            if (r.getEndDate() != null) {
-                stmt.setTimestamp(3, Timestamp.valueOf(r.getEndDate()));
-            } else {
-                stmt.setTimestamp(3, null);
-            }
-
-            stmt.setInt(4, r.getTotalCost());
-            stmt.setInt(5, Integer.parseInt(String.valueOf(r.getVehicleID()))); // Assuming you fix model to int, remove ParseInt if fixed
-            stmt.setInt(6, r.getUserID());
-
-            stmt.executeUpdate();
-            System.out.println("Reservation created successfully!");
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public List<Reservation> getReservationsByUser(int userId) {
-        List<Reservation> list = new ArrayList<>();
-        String sql = "SELECT * FROM reservations WHERE userid = ?";
-
-        try (Connection conn = PostgresConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, userId);
             ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                Reservation r = new Reservation();
-                r.setReservationID(rs.getInt("reservationid"));
-                r.setTypeRes(rs.getString("typeres"));
-
-                Timestamp startTs = rs.getTimestamp("startdate");
-                if (startTs != null) r.setStartDate(startTs.toLocalDateTime());
-
-                Timestamp endTs = rs.getTimestamp("enddate");
-                if (endTs != null) r.setEndDate(endTs.toLocalDateTime());
-
-                r.setTotalCost(rs.getInt("totalcost"));
-                r.setVehicleID(Integer.parseInt(String.valueOf(rs.getInt("vehicleid")))); // Adapting to your String model
-                r.setUserID(rs.getInt("userid"));
-
-                list.add(r);
+            if (rs.next()) {
+                return rs.getInt(1) == 0;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return list;
+        return false;
     }
 
-    public List<Reservation> getAllReservations() {
+    // 2. ADMIN VIEW (FIXED SQL CRASH)
+    public List<Reservation> getAllReservationsWithDetails() {
         List<Reservation> list = new ArrayList<>();
-        String sql = "SELECT * FROM reservations"; // Get EVERYTHING
+
+        // FIX: We convert the Reservation ID to String instead of User ID to Integer.
+        // This prevents the "Invalid input syntax for integer: 'ADMIN01'" error.
+        String sql = "SELECT r.*, u.firstname, u.lastname, u.phonenum " +
+                "FROM reservations r " +
+                "JOIN app_users u ON CAST(r.userid AS VARCHAR) = u.userid";
 
         try (Connection conn = PostgresConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -83,7 +49,7 @@ public class ReservationDAO {
                 Reservation r = new Reservation();
                 r.setReservationID(rs.getInt("reservationid"));
                 r.setTypeRes(rs.getString("typeres"));
-                // Handle timestamps safely
+
                 if (rs.getTimestamp("startdate") != null)
                     r.setStartDate(rs.getTimestamp("startdate").toLocalDateTime());
                 if (rs.getTimestamp("enddate") != null)
@@ -92,11 +58,41 @@ public class ReservationDAO {
                 r.setTotalCost(rs.getInt("totalcost"));
                 r.setVehicleID(rs.getInt("vehicleid"));
                 r.setUserID(rs.getInt("userid"));
+
+                // Populate extra fields
+                String fullName = rs.getString("firstname") + " " + rs.getString("lastname");
+                r.setUserName(fullName);
+                r.setUserPhone(String.valueOf(rs.getInt("phonenum")));
+
                 list.add(r);
             }
         } catch (SQLException e) {
+            System.err.println("Error fetching reservations: " + e.getMessage());
             e.printStackTrace();
         }
         return list;
+    }
+
+    // 3. CREATE RESERVATION
+    public void createReservation(Reservation r) throws SQLException {
+        String sql = "INSERT INTO reservations (typeres, startdate, enddate, totalcost, vehicleid, userid) VALUES (?, ?, ?, ?, ?, ?)";
+
+        try (Connection conn = PostgresConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, r.getTypeRes());
+            stmt.setTimestamp(2, Timestamp.valueOf(r.getStartDate()));
+            stmt.setTimestamp(3, r.getEndDate() != null ? Timestamp.valueOf(r.getEndDate()) : null);
+            stmt.setInt(4, r.getTotalCost());
+            stmt.setInt(5, r.getVehicleID());
+            stmt.setInt(6, r.getUserID());
+
+            stmt.executeUpdate();
+            System.out.println("Reservation created successfully!");
+        }
+    }
+
+    public List<Reservation> getAllReservations() {
+        return getAllReservationsWithDetails();
     }
 }

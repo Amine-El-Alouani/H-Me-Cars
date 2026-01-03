@@ -6,7 +6,7 @@
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.h_me.carsapp.controller.AdminController"
-            prefHeight="600.0" prefWidth="800.0">
+            prefHeight="600.0" prefWidth="900.0">
 
     <top>
         <HBox style="-fx-background-color: #c0392b; -fx-padding: 15;" alignment="CENTER_LEFT" spacing="20">
@@ -32,19 +32,30 @@
                         <TextField fx:id="modelField" promptText="Car Model"/>
                         <TextField fx:id="categoryField" promptText="Category"/>
                         <TextField fx:id="priceField" promptText="Price (MAD)"/>
+
                         <Button text="Add Car" onAction="#handleAddCar" style="-fx-background-color: #27ae60; -fx-text-fill: white;"/>
                         <Button text="Delete Selected" onAction="#handleDeleteCar" style="-fx-background-color: #e74c3c; -fx-text-fill: white;"/>
+
+                        <Button text="Toggle Status" onAction="#handleToggleStatus" style="-fx-background-color: #f39c12; -fx-text-fill: white;"/>
                     </HBox>
                 </VBox>
             </Tab>
 
             <Tab text="All Reservations" closable="false">
-                <VBox style="-fx-padding: 10;">
+                <VBox spacing="10" style="-fx-padding: 10;">
+
+                    <HBox alignment="CENTER_RIGHT">
+                        <Button text="Refresh List" onAction="#refreshData" />
+                    </HBox>
+
                     <TableView fx:id="resTable" VBox.vgrow="ALWAYS">
                         <columns>
-                            <TableColumn fx:id="colResId" text="Res ID" prefWidth="80"/>
-                            <TableColumn fx:id="colUserId" text="User ID" prefWidth="80"/>
-                            <TableColumn fx:id="colResCarId" text="Car ID" prefWidth="80"/>
+                            <TableColumn fx:id="colResId" text="Res ID" prefWidth="60"/>
+
+                            <TableColumn fx:id="colUserName" text="Customer Name" prefWidth="150"/>
+                            <TableColumn fx:id="colUserPhone" text="Phone" prefWidth="100"/>
+
+                            <TableColumn fx:id="colResCarId" text="Car ID" prefWidth="60"/>
                             <TableColumn fx:id="colCost" text="Total Cost" prefWidth="100"/>
                         </columns>
                     </TableView>

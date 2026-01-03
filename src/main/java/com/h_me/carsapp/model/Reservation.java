@@ -19,5 +19,6 @@ public class Reservation {
     private int totalCost;
     private int vehicleID;
     private int userID;
-
+    private String userName;
+    private String userPhone;
 }

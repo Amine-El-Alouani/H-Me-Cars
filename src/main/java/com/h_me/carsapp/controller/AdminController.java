@@ -15,6 +15,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.List;
 
 public class AdminController {
 
@@ -31,35 +32,65 @@ public class AdminController {
     // --- RESERVATION TAB ---
     @FXML private TableView<Reservation> resTable;
     @FXML private TableColumn<Reservation, Integer> colResId;
-    @FXML private TableColumn<Reservation, Integer> colUserId;
     @FXML private TableColumn<Reservation, Integer> colResCarId;
     @FXML private TableColumn<Reservation, Integer> colCost;
+    // NEW COLUMNS
+    @FXML private TableColumn<Reservation, String> colUserName;
+    @FXML private TableColumn<Reservation, String> colUserPhone;
 
     private VehicleDAO vehicleDAO = new VehicleDAO();
     private ReservationDAO reservationDAO = new ReservationDAO();
 
     @FXML
     public void initialize() {
-        // Setup Car Columns
+        // Car Columns
         colCarId.setCellValueFactory(new PropertyValueFactory<>("vehicleID"));
         colModel.setCellValueFactory(new PropertyValueFactory<>("name"));
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
 
-        // Setup Reservation Columns
+        // Reservation Columns
         colResId.setCellValueFactory(new PropertyValueFactory<>("reservationID"));
-        colUserId.setCellValueFactory(new PropertyValueFactory<>("userID"));
         colResCarId.setCellValueFactory(new PropertyValueFactory<>("vehicleID"));
         colCost.setCellValueFactory(new PropertyValueFactory<>("totalCost"));
+
+        // Bind new columns to the fields we added in Reservation.java
+        colUserName.setCellValueFactory(new PropertyValueFactory<>("userName"));
+        colUserPhone.setCellValueFactory(new PropertyValueFactory<>("userPhone"));
 
         refreshData();
     }
 
-    private void refreshData() {
+    @FXML
+    public void refreshData() {
         carTable.setItems(FXCollections.observableArrayList(vehicleDAO.getAllAvailableVehicles()));
-        // Note: For getAllAvailableVehicles, you might want to create 'getAllVehicles' in DAO if you want to see rented ones too.
-        resTable.setItems(FXCollections.observableArrayList(reservationDAO.getAllReservations()));
+        // Use the new method with Details
+        resTable.setItems(FXCollections.observableArrayList(reservationDAO.getAllReservationsWithDetails()));
     }
 
+    @FXML
+    public void handleToggleStatus() {
+        Vehicle selected = carTable.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            String current = selected.getStatus();
+            String newStatus = current.equalsIgnoreCase("AVAILABLE") ? "MAINTENANCE" : "AVAILABLE";
+
+            try {
+                vehicleDAO.updateVehicleStatus(selected.getVehicleID(), newStatus);
+                refreshData(); // Refresh to see change
+                Alert a = new Alert(Alert.AlertType.INFORMATION);
+                a.setContentText("Car marked as " + newStatus);
+                a.show();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            Alert a = new Alert(Alert.AlertType.WARNING);
+            a.setContentText("Select a car to change status.");
+            a.show();
+        }
+    }
+
+    // ... handleAddCar, handleDeleteCar, handleLogout remain same as before ...
     @FXML
     public void handleAddCar() {
         try {
@@ -67,21 +98,12 @@ public class AdminController {
             v.setName(modelField.getText());
             v.setCategory(categoryField.getText());
             v.setPriceRental(Double.parseDouble(priceField.getText()));
-            // Defaults
-            v.setPricePurchase(0);
-            v.setDealershipID(1);
-            v.setManufactureID(1);
+            v.setPricePurchase(0); v.setDealershipID(1); v.setManufactureID(1);
             v.setStatus("AVAILABLE");
-
             vehicleDAO.addVehicle(v);
             refreshData();
             clearFields();
-            Alert a = new Alert(Alert.AlertType.INFORMATION);
-            a.setContentText("Car Added!");
-            a.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
     @FXML
@@ -90,16 +112,10 @@ public class AdminController {
         if (selected != null) {
             vehicleDAO.deleteVehicle(selected.getVehicleID());
             refreshData();
-        } else {
-            Alert a = new Alert(Alert.AlertType.WARNING);
-            a.setContentText("Select a car to delete.");
-            a.show();
         }
     }
 
-    private void clearFields() {
-        modelField.clear(); categoryField.clear(); priceField.clear();
-    }
+    private void clearFields() { modelField.clear(); categoryField.clear(); priceField.clear(); }
 
     @FXML
     public void handleLogout(ActionEvent event) throws IOException {
