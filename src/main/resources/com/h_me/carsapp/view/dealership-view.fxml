@@ -17,11 +17,10 @@
             </HBox>
 
             <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10; -fx-background-color: #ecf0f1;">
-                <Label text="My Lat:"/>
-                <TextField fx:id="latField" text="33.5731" prefWidth="100"/>
-                <Label text="My Lon:"/>
-                <TextField fx:id="lonField" text="-7.5898" prefWidth="100"/>
-                <Button text="Find Nearest (50km)" onAction="#handleSearchNearby"/>
+                <TextField fx:id="cityField" promptText="Search by City" prefWidth="150"/>
+                <TextField fx:id="nameField" promptText="Search by Name" prefWidth="150"/>
+
+                <Button text="Search" onAction="#handleSearch"/>
                 <Button text="Show All" onAction="#loadAllData"/>
             </HBox>
         </VBox>

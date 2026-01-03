@@ -28,8 +28,9 @@ public class DealershipController {
     @FXML private TableColumn<Dealerships, Double> colLat;
     @FXML private TableColumn<Dealerships, Double> colLon;
 
-    @FXML private TextField latField;
-    @FXML private TextField lonField;
+    // CHANGED: New Fields
+    @FXML private TextField cityField;
+    @FXML private TextField nameField;
 
     @FXML private WebView mapWebView;
 
@@ -48,12 +49,23 @@ public class DealershipController {
 
         initMap();
         loadAllData();
+
+        dealerTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                focusOnDealership(newVal);
+            }
+        });
     }
 
+    private void focusOnDealership(Dealerships d) {
+        if (mapReady) {
+            webEngine.executeScript("panToLocation(" + d.getLatitude() + ", " + d.getLongitude() + ")");
+        }
+    }
+
+    // ... (Keep initMap logic exactly as it is) ...
     private void initMap() {
         webEngine = mapWebView.getEngine();
-
-        // 1. Force a browser-like User-Agent to avoid some blocks
         webEngine.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
 
         String htmlContent = "<!DOCTYPE html>\n" +
@@ -63,7 +75,7 @@ public class DealershipController {
                 "    <meta name='viewport' content='width=device-width, initial-scale=1.0'>\n" +
                 "    <link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css' crossorigin=''/>\n" +
                 "    <style>\n" +
-                "        html, body { height: 100%; margin: 0; padding: 0; }\n" +
+                "        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }\n" +
                 "        #map { height: 100%; width: 100%; background: #f0f0f0; }\n" +
                 "    </style>\n" +
                 "</head>\n" +
@@ -71,18 +83,22 @@ public class DealershipController {
                 "    <div id='map'></div>\n" +
                 "    <script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js' crossorigin=''></script>\n" +
                 "    <script>\n" +
+                "        L.Browser.any3d = false; // Keep this to prevent glitches\n" +
                 "        var map;\n" +
                 "        var markers = [];\n" +
                 "        \n" +
                 "        try {\n" +
-                "            map = L.map('map').setView([33.5731, -7.5898], 6);\n" +
+                "            map = L.map('map', {\n" +
+                "                zoomAnimation: false,\n" +
+                "                fadeAnimation: false,\n" +
+                "                markerZoomAnimation: false\n" +
+                "            }).setView([33.5731, -7.5898], 6);\n" +
                 "            \n" +
-                "            // FIX: CHANGED TO CartoDB (They allow JavaFX apps!)\n" +
                 "            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {\n" +
                 "                maxZoom: 19,\n" +
-                "                attribution: '© CartoDB'\n" +
+                "                attribution: '© CartoDB',\n" +
+                "                noWrap: true\n" +
                 "            }).addTo(map);\n" +
-                "            \n" +
                 "        } catch (e) { console.log('Init Error: ' + e); }\n" +
                 "\n" +
                 "        function clearMarkers() {\n" +
@@ -97,10 +113,14 @@ public class DealershipController {
                 "            markers.push(m);\n" +
                 "        }\n" +
                 "        \n" +
+                "        // --- NEW FUNCTION: ZOOMS TO LOCATION ---\n" +
+                "        function panToLocation(lat, lon) {\n" +
+                "            if(!map) return;\n" +
+                "            map.setView([lat, lon], 15); // Zoom level 15\n" +
+                "        }\n" +
+                "        \n" +
                 "        function resizeMap() {\n" +
-                "           if(map) { \n" +
-                "               map.invalidateSize(); \n" +
-                "           }\n" +
+                "           if(map) { map.invalidateSize(); }\n" +
                 "        }\n" +
                 "    </script>\n" +
                 "</body>\n" +
@@ -112,21 +132,14 @@ public class DealershipController {
             if (newState == Worker.State.SUCCEEDED) {
                 mapReady = true;
                 refreshMapMarkers(dealerTable.getItems());
-
-                // Keep the resize fix for the grey tiles
                 PauseTransition pause = new PauseTransition(Duration.seconds(1));
                 pause.setOnFinished(e -> webEngine.executeScript("resizeMap()"));
                 pause.play();
             }
         });
 
-        // Resize listeners
-        mapWebView.widthProperty().addListener((obs, oldVal, newVal) -> {
-            if(mapReady) webEngine.executeScript("resizeMap()");
-        });
-        mapWebView.heightProperty().addListener((obs, oldVal, newVal) -> {
-            if(mapReady) webEngine.executeScript("resizeMap()");
-        });
+        mapWebView.widthProperty().addListener((obs, oldVal, newVal) -> { if(mapReady) webEngine.executeScript("resizeMap()"); });
+        mapWebView.heightProperty().addListener((obs, oldVal, newVal) -> { if(mapReady) webEngine.executeScript("resizeMap()"); });
     }
 
     @FXML
@@ -136,34 +149,26 @@ public class DealershipController {
         refreshMapMarkers(list);
     }
 
+    // CHANGED: Logic to search by text inputs
     @FXML
-    public void handleSearchNearby() {
-        try {
-            double lat = Double.parseDouble(latField.getText());
-            double lon = Double.parseDouble(lonField.getText());
+    public void handleSearch() {
+        String city = cityField.getText() == null ? "" : cityField.getText().trim();
+        String name = nameField.getText() == null ? "" : nameField.getText().trim();
 
-            List<Dealerships> nearby = dealershipDAO.findNearby(lat, lon, 50.0);
-            dealerTable.setItems(FXCollections.observableArrayList(nearby));
-            refreshMapMarkers(nearby);
+        List<Dealerships> results = dealershipDAO.searchDealerships(city, name);
+        dealerTable.setItems(FXCollections.observableArrayList(results));
+        refreshMapMarkers(results);
 
-            if(nearby.isEmpty()){
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setContentText("No dealerships found within 50km.");
-                alert.show();
-            }
-
-        } catch (NumberFormatException e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setContentText("Please enter valid numbers for Lat/Lon.");
+        if (results.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setContentText("No dealerships found matching your criteria.");
             alert.show();
         }
     }
 
     private void refreshMapMarkers(List<Dealerships> dealerships) {
         if (!mapReady || dealerships == null) return;
-
         webEngine.executeScript("clearMarkers()");
-
         for (Dealerships d : dealerships) {
             String safeName = d.getName().replace("'", "\\'");
             webEngine.executeScript("addMarker(" + d.getLatitude() + ", " + d.getLongitude() + ", '" + safeName + "')");

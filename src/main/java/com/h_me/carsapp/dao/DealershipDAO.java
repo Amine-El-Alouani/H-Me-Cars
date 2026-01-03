@@ -69,4 +69,31 @@ public class DealershipDAO {
         }
         return list;
     }
+    public List<Dealerships> searchDealerships(String city, String name) {
+        List<Dealerships> list = new ArrayList<>();
+
+        // precise search not required (uses partial match with %)
+        String sql = "SELECT * FROM dealerships WHERE LOWER(city) LIKE ? AND LOWER(name) LIKE ?";
+
+        try (Connection conn = PostgresConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, "%" + city.toLowerCase() + "%");
+            stmt.setString(2, "%" + name.toLowerCase() + "%");
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Dealerships d = new Dealerships();
+                d.setDealershipID(rs.getInt("dealershipid"));
+                d.setName(rs.getString("name"));
+                d.setCity(rs.getString("city"));
+                d.setLatitude(rs.getDouble("latitude"));
+                d.setLongitude(rs.getDouble("longitude"));
+                list.add(d);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }
