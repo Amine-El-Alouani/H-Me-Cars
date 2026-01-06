@@ -17,4 +17,5 @@ public class Vehicle {
     private String status;
     private int dealershipID;
     private int manufactureID;
+    private java.time.LocalDateTime availableFrom;
 }

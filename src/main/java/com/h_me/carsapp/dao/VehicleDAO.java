@@ -4,6 +4,7 @@ import com.h_me.carsapp.model.Vehicle;
 import com.h_me.carsapp.utils.PostgresConnection;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,11 +13,16 @@ public class VehicleDAO {
 
     public List<Vehicle> getAllAvailableVehicles() {
         List<Vehicle> list = new ArrayList<>();
-        String sql = "SELECT * FROM vehicles WHERE status = 'AVAILABLE'";
+        // Fetch all vehicles, and find the latest future end date for reservations using Java's time
+        String sql = "SELECT v.*, " +
+                     "(SELECT MAX(r.enddate) FROM reservations r WHERE r.vehicleid = v.vehicleid AND r.enddate >= ?) as reserved_until " +
+                     "FROM vehicles v";
 
         try (Connection conn = PostgresConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
+            ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
                 Vehicle v = new Vehicle();
@@ -29,6 +35,11 @@ public class VehicleDAO {
                 v.setStatus(rs.getString("status"));
                 v.setDealershipID(rs.getInt("dealershipid"));      // DB: dealershipid
                 v.setManufactureID(rs.getInt("manufacturerid"));   // DB: manufacturerid
+                
+                Timestamp reservedUntil = rs.getTimestamp("reserved_until");
+                if (reservedUntil != null) {
+                    v.setAvailableFrom(reservedUntil.toLocalDateTime());
+                }
 
                 list.add(v);
             }
