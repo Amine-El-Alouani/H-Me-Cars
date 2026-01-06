@@ -28,7 +28,6 @@ public class DealershipController {
     @FXML private TableColumn<Dealerships, Double> colLat;
     @FXML private TableColumn<Dealerships, Double> colLon;
 
-    // CHANGED: New Fields
     @FXML private TextField cityField;
     @FXML private TextField nameField;
 
@@ -63,7 +62,6 @@ public class DealershipController {
         }
     }
 
-    // ... (Keep initMap logic exactly as it is) ...
     private void initMap() {
         webEngine = mapWebView.getEngine();
         webEngine.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
@@ -149,7 +147,6 @@ public class DealershipController {
         refreshMapMarkers(list);
     }
 
-    // CHANGED: Logic to search by text inputs
     @FXML
     public void handleSearch() {
         String city = cityField.getText() == null ? "" : cityField.getText().trim();

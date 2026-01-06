@@ -20,20 +20,16 @@ public class ReservationService {
 
     public boolean processRental(Vehicle vehicle, int userId, LocalDateTime startDate, LocalDateTime endDate) {
 
-        // 1. NEW VALIDATION: Check Dates instead of just Status
-        // If the status is 'MAINTENANCE', block it regardless of dates.
         if (vehicle.getStatus().equalsIgnoreCase("MAINTENANCE")) {
             System.out.println("Error: Car is under maintenance.");
             return false;
         }
 
-        // Check if dates overlap with another reservation
         if (!reservationDAO.isCarAvailable(vehicle.getVehicleID(), startDate, endDate)) {
             System.out.println("Error: Car is already booked for these dates!");
             return false;
         }
 
-        // 2. Process Calculation
         long days = ChronoUnit.DAYS.between(startDate, endDate);
         if (days < 1) days = 1;
         double totalCost = days * vehicle.getPriceRental();
@@ -48,11 +44,7 @@ public class ReservationService {
         reservation.setUserID(userId);
 
         try {
-            // 4. Save to DB
             reservationDAO.createReservation(reservation);
-
-            // OPTIONAL: We don't necessarily need to set status to 'RENTED' anymore
-            // because we rely on dates. But we can set it for visual reference if the rental is TODAY.
             if (startDate.toLocalDate().equals(LocalDateTime.now().toLocalDate())) {
                 vehicleDAO.updateVehicleStatus(vehicle.getVehicleID(), "RENTED");
             }

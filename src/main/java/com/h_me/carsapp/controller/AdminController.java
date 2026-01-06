@@ -34,7 +34,6 @@ public class AdminController {
     @FXML private TableColumn<Reservation, Integer> colResId;
     @FXML private TableColumn<Reservation, Integer> colResCarId;
     @FXML private TableColumn<Reservation, Integer> colCost;
-    // NEW COLUMNS
     @FXML private TableColumn<Reservation, String> colUserName;
     @FXML private TableColumn<Reservation, String> colUserPhone;
 
@@ -63,7 +62,6 @@ public class AdminController {
     @FXML
     public void refreshData() {
         carTable.setItems(FXCollections.observableArrayList(vehicleDAO.getAllAvailableVehicles()));
-        // Use the new method with Details
         resTable.setItems(FXCollections.observableArrayList(reservationDAO.getAllReservationsWithDetails()));
     }
 
@@ -90,7 +88,6 @@ public class AdminController {
         }
     }
 
-    // ... handleAddCar, handleDeleteCar, handleLogout remain same as before ...
     @FXML
     public void handleAddCar() {
         try {

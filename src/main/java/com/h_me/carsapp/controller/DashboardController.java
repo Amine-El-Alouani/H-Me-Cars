@@ -101,8 +101,6 @@ public class DashboardController {
 
         try {
             int userId = Integer.parseInt(session.getUser().getUserID());
-
-            // Call Service
             boolean success = reservationService.processRental(selectedCar, userId, start, end);
 
             if (success) {
@@ -121,13 +119,9 @@ public class DashboardController {
         }
     }
 
-    // --- NEW LOGOUT METHOD ---
     @FXML
     public void handleLogout(ActionEvent event) throws IOException {
-        // 1. Clear Session
         UserSession.cleanUserSession();
-
-        // 2. Go to Login View
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/h_me/carsapp/view/login-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 400, 400);
         Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();

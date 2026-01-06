@@ -32,8 +32,6 @@ public class LoginController {
             UserSession.setSession(user);
 
             try {
-                // --- NEW LOGIC: Check Role and Redirect ---
-                // Ensure your User model has the .getRole() method!
                 if ("ADMIN".equalsIgnoreCase(user.getRole())) {
                     goToAdminDashboard(event);
                 } else {
@@ -68,10 +66,8 @@ public class LoginController {
         stage.show();
     }
 
-    // --- NEW METHOD: Load Admin View ---
     private void goToAdminDashboard(ActionEvent event) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/h_me/carsapp/view/admin-view.fxml"));
-        // Admin view might need a slightly larger window
         Scene scene = new Scene(fxmlLoader.load(), 1000, 600);
         Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
         stage.setTitle("Admin Panel - H-Me Cars");

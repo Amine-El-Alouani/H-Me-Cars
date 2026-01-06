@@ -10,7 +10,6 @@ import java.util.List;
 
 public class ReservationDAO {
 
-    // 1. SMART CHECK
     public boolean isCarAvailable(int vehicleId, LocalDateTime newStart, LocalDateTime newEnd) {
         String sql = "SELECT COUNT(*) FROM reservations WHERE vehicleid = ? AND (startdate < ? AND enddate > ?)";
 
@@ -31,12 +30,8 @@ public class ReservationDAO {
         return false;
     }
 
-    // 2. ADMIN VIEW (FIXED SQL CRASH)
     public List<Reservation> getAllReservationsWithDetails() {
         List<Reservation> list = new ArrayList<>();
-
-        // FIX: We convert the Reservation ID to String instead of User ID to Integer.
-        // This prevents the "Invalid input syntax for integer: 'ADMIN01'" error.
         String sql = "SELECT r.*, u.firstname, u.lastname, u.phonenum " +
                 "FROM reservations r " +
                 "JOIN app_users u ON CAST(r.userid AS VARCHAR) = u.userid";
@@ -59,7 +54,6 @@ public class ReservationDAO {
                 r.setVehicleID(rs.getInt("vehicleid"));
                 r.setUserID(rs.getInt("userid"));
 
-                // Populate extra fields
                 String fullName = rs.getString("firstname") + " " + rs.getString("lastname");
                 r.setUserName(fullName);
                 r.setUserPhone(String.valueOf(rs.getInt("phonenum")));
@@ -73,7 +67,6 @@ public class ReservationDAO {
         return list;
     }
 
-    // 3. CREATE RESERVATION
     public void createReservation(Reservation r) throws SQLException {
         String sql = "INSERT INTO reservations (typeres, startdate, enddate, totalcost, vehicleid, userid) VALUES (?, ?, ?, ?, ?, ?)";
 

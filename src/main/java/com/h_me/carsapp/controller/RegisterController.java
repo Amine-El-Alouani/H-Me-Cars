@@ -32,8 +32,6 @@ public class RegisterController {
 
         try {
             User u = new User();
-
-            // GENERATE A RANDOM NUMERIC ID
             int randomId = 100000 + new Random().nextInt(900000);
             u.setUserID(String.valueOf(randomId)); // Set as String for User Model
 
