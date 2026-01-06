@@ -34,7 +34,6 @@ public class ReservationService {
         if (days < 1) days = 1;
         double totalCost = days * vehicle.getPriceRental();
 
-        // 3. Create Object
         Reservation reservation = new Reservation();
         reservation.setTypeRes("RENTAL");
         reservation.setStartDate(startDate);

@@ -46,6 +46,23 @@ public class DashboardController {
         colPrice.setCellValueFactory(new PropertyValueFactory<>("priceRental"));
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
 
+        colStatus.setCellFactory(column -> new TableCell<Vehicle, String>() {
+            @Override
+            protected void updateItem(String status, boolean empty) {
+                super.updateItem(status, empty);
+                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                    setText(null);
+                } else {
+                    Vehicle v = getTableRow().getItem();
+                    if (v.getAvailableFrom() != null && v.getAvailableFrom().isAfter(LocalDateTime.now())) {
+                        setText("Unavailable until " + v.getAvailableFrom().toLocalDate());
+                    } else {
+                        setText(status);
+                    }
+                }
+            }
+        });
+
         loadData();
     }
 
@@ -81,7 +98,12 @@ public class DashboardController {
         }
 
         LocalDateTime start = startDatePicker.getValue().atStartOfDay();
-        LocalDateTime end = endDatePicker.getValue().atStartOfDay();
+        LocalDateTime end = endDatePicker.getValue().atTime(23, 59, 59);
+
+        if (startDatePicker.getValue().isBefore(java.time.LocalDate.now())) {
+            showAlert(Alert.AlertType.ERROR, "Invalid Dates", "Start date cannot be in the past.");
+            return;
+        }
 
         if (end.isBefore(start)) {
             showAlert(Alert.AlertType.ERROR, "Invalid Dates", "End date cannot be before start date.");
