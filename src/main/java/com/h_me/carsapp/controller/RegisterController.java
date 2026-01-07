@@ -2,6 +2,7 @@ package com.h_me.carsapp.controller;
 
 import com.h_me.carsapp.dao.UserDAO;
 import com.h_me.carsapp.model.User;
+import com.h_me.carsapp.utils.StyledAlert;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -26,7 +27,7 @@ public class RegisterController {
     @FXML
     public void handleRegister(ActionEvent event) {
         if(emailField.getText().isEmpty() || passwordField.getText().isEmpty()) {
-            showAlert("Error", "Please fill all fields");
+            StyledAlert.error("Missing Fields", "Please fill all fields to create your account.");
             return;
         }
 
@@ -42,13 +43,13 @@ public class RegisterController {
             u.setPassword(passwordField.getText());
 
             if(userDAO.registerUser(u)) {
-                showAlert("Success", "Account created! Please Login.");
+                StyledAlert.success("Account Created!", "Your account has been created successfully. Please sign in to continue.");
                 goToLogin(event);
             } else {
-                showAlert("Error", "Registration failed (Email might exist).");
+                StyledAlert.error("Registration Failed", "Could not create account. This email may already be registered.");
             }
         } catch (NumberFormatException e) {
-            showAlert("Error", "Phone number must be numeric.");
+            StyledAlert.error("Invalid Phone", "Phone number must contain only digits.");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -62,12 +63,5 @@ public class RegisterController {
         stage.setTitle("Login - H-Me Cars");
         stage.setScene(scene);
         stage.show();
-    }
-
-    private void showAlert(String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setContentText(content);
-        alert.show();
     }
 }

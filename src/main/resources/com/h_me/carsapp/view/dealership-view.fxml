@@ -7,38 +7,47 @@
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.h_me.carsapp.controller.DealershipController"
-            prefHeight="600.0" prefWidth="1000.0">
+            stylesheets="@../styles.css"
+            style="-fx-background-color: #0f172a;"
+            prefHeight="700.0" prefWidth="1100.0">
 
+    <!-- Header -->
     <top>
         <VBox>
-            <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-background-color: #2c3e50; -fx-padding: 15;">
-                <Button text="← Back to Cars" onAction="#goBack" style="-fx-background-color: #95a5a6; -fx-text-fill: white;"/>
-                <Label text="Dealership Locator" textFill="WHITE" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+            <HBox styleClass="header-bar" alignment="CENTER_LEFT">
+                <Button text="← Back to Cars" onAction="#goBack" styleClass="button"/>
+                <Label text="📍" style="-fx-font-size: 22px; -fx-padding: 0 0 0 16;"/>
+                <Label text="Dealership Locator" styleClass="header-title"/>
             </HBox>
 
-            <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10; -fx-background-color: #ecf0f1;">
-                <TextField fx:id="cityField" promptText="Search by City" prefWidth="150"/>
-                <TextField fx:id="nameField" promptText="Search by Name" prefWidth="150"/>
-
-                <Button text="Search" onAction="#handleSearch"/>
-                <Button text="Show All" onAction="#loadAllData"/>
+            <!-- Search Bar -->
+            <HBox styleClass="search-container" alignment="CENTER_LEFT">
+                <TextField fx:id="cityField" promptText="Search by City" prefWidth="180" styleClass="text-field"/>
+                <TextField fx:id="nameField" promptText="Search by Name" prefWidth="180" styleClass="text-field"/>
+                <Button text="🔍 Search" onAction="#handleSearch" styleClass="button-primary"/>
+                <Button text="Show All" onAction="#loadAllData" styleClass="button"/>
             </HBox>
         </VBox>
     </top>
 
+    <!-- Split View: Table + Map -->
     <center>
-        <SplitPane dividerPositions="0.4">
-            <TableView fx:id="dealerTable">
-                <columns>
-                    <TableColumn fx:id="colName" text="Dealership Name" prefWidth="150"/>
-                    <TableColumn fx:id="colCity" text="City" prefWidth="100"/>
-                    <TableColumn fx:id="colLat" text="Lat" prefWidth="80"/>
-                    <TableColumn fx:id="colLon" text="Lon" prefWidth="80"/>
-                </columns>
-            </TableView>
+        <SplitPane dividerPositions="0.4" style="-fx-padding: 16;">
+            <!-- Dealership Table -->
+            <VBox>
+                <TableView fx:id="dealerTable" VBox.vgrow="ALWAYS" styleClass="table-view">
+                    <columns>
+                        <TableColumn fx:id="colName" text="Dealership Name" prefWidth="180"/>
+                        <TableColumn fx:id="colCity" text="City" prefWidth="120"/>
+                        <TableColumn fx:id="colLat" text="Latitude" prefWidth="90"/>
+                        <TableColumn fx:id="colLon" text="Longitude" prefWidth="90"/>
+                    </columns>
+                </TableView>
+            </VBox>
 
-            <StackPane>
-                <WebView fx:id="mapWebView" minWidth="100" minHeight="100"/>
+            <!-- Map View -->
+            <StackPane style="-fx-background-color: #1e293b; -fx-background-radius: 12;">
+                <WebView fx:id="mapWebView"/>
             </StackPane>
         </SplitPane>
     </center>

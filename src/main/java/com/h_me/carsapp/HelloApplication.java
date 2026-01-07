@@ -11,8 +11,9 @@ public class HelloApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/h_me/carsapp/view/login-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 400, 400);
-        stage.setTitle("H-Me Cars Login");
+        Scene scene = new Scene(fxmlLoader.load(), 500, 600);
+        scene.getStylesheets().add(getClass().getResource("/com/h_me/carsapp/styles.css").toExternalForm());
+        stage.setTitle("H-Me Cars");
         stage.setScene(scene);
         stage.show();
     }

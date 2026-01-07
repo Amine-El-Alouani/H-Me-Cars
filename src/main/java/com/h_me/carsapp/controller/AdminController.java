@@ -4,6 +4,7 @@ import com.h_me.carsapp.dao.ReservationDAO;
 import com.h_me.carsapp.dao.VehicleDAO;
 import com.h_me.carsapp.model.Reservation;
 import com.h_me.carsapp.model.Vehicle;
+import com.h_me.carsapp.utils.StyledAlert;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -15,7 +16,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.List;
 
 public class AdminController {
 
@@ -75,21 +75,23 @@ public class AdminController {
             try {
                 vehicleDAO.updateVehicleStatus(selected.getVehicleID(), newStatus);
                 refreshData(); // Refresh to see change
-                Alert a = new Alert(Alert.AlertType.INFORMATION);
-                a.setContentText("Car marked as " + newStatus);
-                a.show();
+                StyledAlert.success("Status Updated", "Car has been marked as " + newStatus);
             } catch (Exception e) {
                 e.printStackTrace();
+                StyledAlert.error("Update Failed", "Could not update car status.");
             }
         } else {
-            Alert a = new Alert(Alert.AlertType.WARNING);
-            a.setContentText("Select a car to change status.");
-            a.show();
+            StyledAlert.warning("No Selection", "Please select a car to change its status.");
         }
     }
 
     @FXML
     public void handleAddCar() {
+        if (modelField.getText().isEmpty() || categoryField.getText().isEmpty() || priceField.getText().isEmpty()) {
+            StyledAlert.warning("Missing Fields", "Please fill in Model, Category, and Price to add a car.");
+            return;
+        }
+        
         try {
             Vehicle v = new Vehicle();
             v.setName(modelField.getText());
@@ -100,7 +102,13 @@ public class AdminController {
             vehicleDAO.addVehicle(v);
             refreshData();
             clearFields();
-        } catch (Exception e) { e.printStackTrace(); }
+            StyledAlert.success("Car Added", "New car \"" + v.getName() + "\" has been added to inventory.");
+        } catch (NumberFormatException e) {
+            StyledAlert.error("Invalid Price", "Price must be a valid number.");
+        } catch (Exception e) { 
+            e.printStackTrace(); 
+            StyledAlert.error("Add Failed", "Could not add car to database.");
+        }
     }
 
     @FXML
@@ -109,6 +117,9 @@ public class AdminController {
         if (selected != null) {
             vehicleDAO.deleteVehicle(selected.getVehicleID());
             refreshData();
+            StyledAlert.success("Car Deleted", "\"" + selected.getName() + "\" has been removed from inventory.");
+        } else {
+            StyledAlert.warning("No Selection", "Please select a car to delete.");
         }
     }
 

@@ -3,7 +3,8 @@ package com.h_me.carsapp.controller;
 import com.h_me.carsapp.dao.VehicleDAO;
 import com.h_me.carsapp.model.Vehicle;
 import com.h_me.carsapp.service.ReservationService;
-import com.h_me.carsapp.utils.UserSession; // Import Session
+import com.h_me.carsapp.utils.StyledAlert;
+import com.h_me.carsapp.utils.UserSession;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -88,12 +89,12 @@ public class DashboardController {
         Vehicle selectedCar = vehicleTable.getSelectionModel().getSelectedItem();
 
         if (selectedCar == null) {
-            showAlert(Alert.AlertType.WARNING, "No Selection", "Please select a car to rent.");
+            StyledAlert.warning("No Selection", "Please select a car to rent.");
             return;
         }
 
         if (startDatePicker.getValue() == null || endDatePicker.getValue() == null) {
-            showAlert(Alert.AlertType.WARNING, "Missing Dates", "Please select Start and End dates.");
+            StyledAlert.warning("Missing Dates", "Please select Start and End dates.");
             return;
         }
 
@@ -101,12 +102,12 @@ public class DashboardController {
         LocalDateTime end = endDatePicker.getValue().atTime(23, 59, 59);
 
         if (startDatePicker.getValue().isBefore(java.time.LocalDate.now())) {
-            showAlert(Alert.AlertType.ERROR, "Invalid Dates", "Start date cannot be in the past.");
+            StyledAlert.error("Invalid Dates", "Start date cannot be in the past.");
             return;
         }
 
         if (end.isBefore(start)) {
-            showAlert(Alert.AlertType.ERROR, "Invalid Dates", "End date cannot be before start date.");
+            StyledAlert.error("Invalid Dates", "End date cannot be before start date.");
             return;
         }
 
@@ -117,7 +118,7 @@ public class DashboardController {
         // --- USER ID CHECK ---
         UserSession session = UserSession.getInstance();
         if (session == null || session.getUser() == null) {
-            showAlert(Alert.AlertType.ERROR, "Not Logged In", "Please log out and log in again.");
+            StyledAlert.error("Not Logged In", "Please log out and log in again.");
             return;
         }
 
@@ -127,17 +128,17 @@ public class DashboardController {
 
             if (success) {
                 String msg = String.format("Car: %s\nDays: %d\nTotal: %.2f MAD", selectedCar.getName(), days, estimatedCost);
-                showAlert(Alert.AlertType.INFORMATION, "Reservation Confirmed!", msg);
+                StyledAlert.success("Reservation Confirmed!", msg);
                 loadData(); // Refresh table to remove rented car
             } else {
-                showAlert(Alert.AlertType.ERROR, "Rental Failed", "Check the Console for Database Errors.");
+                StyledAlert.error("Rental Failed", "Check the Console for Database Errors.");
             }
 
         } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.ERROR, "User ID Error", "Your User ID is not a number. Admin accounts cannot rent cars.");
+            StyledAlert.error("User ID Error", "Your User ID is not a number. Admin accounts cannot rent cars.");
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "System Error", e.getMessage());
+            StyledAlert.error("System Error", e.getMessage());
         }
     }
 
@@ -150,14 +151,6 @@ public class DashboardController {
         stage.setTitle("Login - H-Me Cars");
         stage.setScene(scene);
         stage.show();
-    }
-
-    private void showAlert(Alert.AlertType type, String title, String content) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
     }
 
     @FXML

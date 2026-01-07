@@ -2,6 +2,7 @@ package com.h_me.carsapp.controller;
 
 import com.h_me.carsapp.dao.DealershipDAO;
 import com.h_me.carsapp.model.Dealerships;
+import com.h_me.carsapp.utils.StyledAlert;
 import javafx.animation.PauseTransition;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Worker;
@@ -157,9 +158,7 @@ public class DealershipController {
         refreshMapMarkers(results);
 
         if (results.isEmpty()) {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setContentText("No dealerships found matching your criteria.");
-            alert.show();
+            StyledAlert.info("No Results", "No dealerships found matching your criteria.");
         }
     }
 
