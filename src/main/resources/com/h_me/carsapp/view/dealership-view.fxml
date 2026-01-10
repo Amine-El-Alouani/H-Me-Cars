@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.web.WebView?>
@@ -8,48 +9,115 @@
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.h_me.carsapp.controller.DealershipController"
             stylesheets="@../styles.css"
-            style="-fx-background-color: #0f172a;"
-            prefHeight="700.0" prefWidth="1100.0">
+            styleClass="root-container">
 
     <!-- Header -->
     <top>
         <VBox>
-            <HBox styleClass="header-bar" alignment="CENTER_LEFT">
-                <Button text="← Back to Cars" onAction="#goBack" styleClass="button"/>
-                <Label text="📍" style="-fx-font-size: 22px; -fx-padding: 0 0 0 16;"/>
-                <Label text="Dealership Locator" styleClass="header-title"/>
+            <!-- Main Header Bar -->
+            <HBox styleClass="header-bar" alignment="CENTER_LEFT" spacing="16">
+                <Button text="← Back to Dashboard" 
+                        onAction="#goBack" 
+                        styleClass="button"
+                        style="-fx-padding: 10 20;"/>
+                
+                <Region prefWidth="8"/>
+                
+                <Label text="📍" style="-fx-font-size: 24px;"/>
+                <VBox spacing="2">
+                    <Label text="Dealership Locator" styleClass="header-title"/>
+                    <Label text="Find H-Me Cars dealerships near you" styleClass="header-subtitle"/>
+                </VBox>
             </HBox>
 
-            <!-- Search Bar -->
-            <HBox styleClass="search-container" alignment="CENTER_LEFT">
-                <TextField fx:id="cityField" promptText="Search by City" prefWidth="180" styleClass="text-field"/>
-                <TextField fx:id="nameField" promptText="Search by Name" prefWidth="180" styleClass="text-field"/>
-                <Button text="🔍 Search" onAction="#handleSearch" styleClass="button-primary"/>
-                <Button text="Show All" onAction="#loadAllData" styleClass="button"/>
+            <!-- Search Section -->
+            <HBox styleClass="content-header" alignment="CENTER_LEFT" spacing="16">
+                <HBox styleClass="search-bar" alignment="CENTER_LEFT" spacing="10" prefWidth="260">
+                    <Label text="🏙️" style="-fx-font-size: 14px;"/>
+                    <TextField fx:id="cityField" 
+                               promptText="Search by city..."
+                               styleClass="search-input"
+                               HBox.hgrow="ALWAYS"/>
+                </HBox>
+                
+                <HBox styleClass="search-bar" alignment="CENTER_LEFT" spacing="10" prefWidth="260">
+                    <Label text="🏢" style="-fx-font-size: 14px;"/>
+                    <TextField fx:id="nameField" 
+                               promptText="Search by dealership name..."
+                               styleClass="search-input"
+                               HBox.hgrow="ALWAYS"/>
+                </HBox>
+                
+                <Button text="🔍  Search" 
+                        onAction="#handleSearch" 
+                        styleClass="button-primary"
+                        style="-fx-padding: 12 24;"/>
+                
+                <Button text="Show All" 
+                        onAction="#loadAllData" 
+                        styleClass="button"
+                        style="-fx-padding: 12 20;"/>
             </HBox>
         </VBox>
     </top>
 
     <!-- Split View: Table + Map -->
     <center>
-        <SplitPane dividerPositions="0.4" style="-fx-padding: 16;">
-            <!-- Dealership Table -->
-            <VBox>
+        <HBox styleClass="content-body" spacing="24">
+            
+            <!-- Left Side - Dealership Table -->
+            <VBox styleClass="card" HBox.hgrow="ALWAYS" prefWidth="500">
+                
+                <!-- Card Header -->
+                <HBox styleClass="card-header" alignment="CENTER_LEFT">
+                    <VBox spacing="4">
+                        <Label text="Dealerships" styleClass="card-title"/>
+                        <Label text="Click a row to view on map" styleClass="card-subtitle"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="↻ Refresh" 
+                            onAction="#loadAllData"
+                            styleClass="button"
+                            style="-fx-padding: 8 16; -fx-font-size: 13px;"/>
+                </HBox>
+                
+                <!-- Table -->
                 <TableView fx:id="dealerTable" VBox.vgrow="ALWAYS" styleClass="table-view">
+                    <VBox.margin>
+                        <Insets top="16"/>
+                    </VBox.margin>
                     <columns>
-                        <TableColumn fx:id="colName" text="Dealership Name" prefWidth="180"/>
-                        <TableColumn fx:id="colCity" text="City" prefWidth="120"/>
-                        <TableColumn fx:id="colLat" text="Latitude" prefWidth="90"/>
-                        <TableColumn fx:id="colLon" text="Longitude" prefWidth="90"/>
+                        <TableColumn fx:id="colName" text="Dealership Name" prefWidth="200"/>
+                        <TableColumn fx:id="colCity" text="City" prefWidth="140"/>
+                        <TableColumn fx:id="colLat" text="Latitude" prefWidth="100"/>
+                        <TableColumn fx:id="colLon" text="Longitude" prefWidth="100"/>
                     </columns>
                 </TableView>
+                
             </VBox>
 
-            <!-- Map View -->
-            <StackPane style="-fx-background-color: #1e293b; -fx-background-radius: 12;">
-                <WebView fx:id="mapWebView"/>
-            </StackPane>
-        </SplitPane>
+            <!-- Right Side - Map View -->
+            <VBox styleClass="card" HBox.hgrow="ALWAYS" prefWidth="600">
+                
+                <!-- Card Header -->
+                <HBox styleClass="card-header" alignment="CENTER_LEFT">
+                    <VBox spacing="4">
+                        <Label text="Map View" styleClass="card-title"/>
+                        <Label text="Interactive dealership locations" styleClass="card-subtitle"/>
+                    </VBox>
+                </HBox>
+                
+                <!-- Map Container -->
+                <StackPane styleClass="map-container" VBox.vgrow="ALWAYS">
+                    <VBox.margin>
+                        <Insets top="16"/>
+                    </VBox.margin>
+                    <WebView fx:id="mapWebView"/>
+                </StackPane>
+                
+            </VBox>
+            
+        </HBox>
     </center>
 
 </BorderPane>

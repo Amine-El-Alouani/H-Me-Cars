@@ -1,5 +1,7 @@
 package com.h_me.carsapp.controller;
 
+import animatefx.animation.FadeIn;
+import animatefx.animation.SlideInLeft;
 import com.h_me.carsapp.dao.DealershipDAO;
 import com.h_me.carsapp.model.Dealerships;
 import com.h_me.carsapp.utils.StyledAlert;
@@ -10,6 +12,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -74,15 +77,17 @@ public class DealershipController {
                 "    <meta name='viewport' content='width=device-width, initial-scale=1.0'>\n" +
                 "    <link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css' crossorigin=''/>\n" +
                 "    <style>\n" +
-                "        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }\n" +
-                "        #map { height: 100%; width: 100%; background: #f0f0f0; }\n" +
+                "        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: #1e293b; }\n" +
+                "        #map { height: 100%; width: 100%; background: #1e293b; border-radius: 12px; }\n" +
+                "        .leaflet-popup-content-wrapper { background: #1e293b; color: #f8fafc; border-radius: 12px; }\n" +
+                "        .leaflet-popup-tip { background: #1e293b; }\n" +
                 "    </style>\n" +
                 "</head>\n" +
                 "<body>\n" +
                 "    <div id='map'></div>\n" +
                 "    <script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js' crossorigin=''></script>\n" +
                 "    <script>\n" +
-                "        L.Browser.any3d = false; // Keep this to prevent glitches\n" +
+                "        L.Browser.any3d = false;\n" +
                 "        var map;\n" +
                 "        var markers = [];\n" +
                 "        \n" +
@@ -93,7 +98,7 @@ public class DealershipController {
                 "                markerZoomAnimation: false\n" +
                 "            }).setView([33.5731, -7.5898], 6);\n" +
                 "            \n" +
-                "            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {\n" +
+                "            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {\n" +
                 "                maxZoom: 19,\n" +
                 "                attribution: '© CartoDB',\n" +
                 "                noWrap: true\n" +
@@ -108,14 +113,13 @@ public class DealershipController {
                 "\n" +
                 "        function addMarker(lat, lon, name) {\n" +
                 "            if(!map) return;\n" +
-                "            var m = L.marker([lat, lon]).addTo(map).bindPopup(name);\n" +
+                "            var m = L.marker([lat, lon]).addTo(map).bindPopup('<strong>' + name + '</strong>');\n" +
                 "            markers.push(m);\n" +
                 "        }\n" +
                 "        \n" +
-                "        // --- NEW FUNCTION: ZOOMS TO LOCATION ---\n" +
                 "        function panToLocation(lat, lon) {\n" +
                 "            if(!map) return;\n" +
-                "            map.setView([lat, lon], 15); // Zoom level 15\n" +
+                "            map.setView([lat, lon], 15);\n" +
                 "        }\n" +
                 "        \n" +
                 "        function resizeMap() {\n" +
@@ -146,6 +150,9 @@ public class DealershipController {
         List<Dealerships> list = dealershipDAO.getAllDealerships();
         dealerTable.setItems(FXCollections.observableArrayList(list));
         refreshMapMarkers(list);
+        
+        // Add animation
+        new FadeIn(dealerTable).setSpeed(2.0).play();
     }
 
     @FXML
@@ -173,10 +180,15 @@ public class DealershipController {
 
     @FXML
     public void goBack(ActionEvent event) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/h_me/carsapp/view/dashboard.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 900, 600);
         Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
-        stage.setScene(scene);
-        stage.show();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/h_me/carsapp/view/dashboard.fxml"));
+        Parent root = loader.load();
+        
+        // Slide left animation for going back
+        new SlideInLeft(root).setSpeed(2.0).play();
+        
+        Scene scene = stage.getScene();
+        scene.setRoot(root);
+        stage.setTitle("H-Me Cars - Dashboard");
     }
 }

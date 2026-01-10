@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
@@ -7,16 +8,30 @@
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.h_me.carsapp.controller.AdminController"
             stylesheets="@../styles.css"
-            style="-fx-background-color: #0f172a;"
-            prefHeight="700.0" prefWidth="1000.0">
+            styleClass="root-container-admin">
 
     <!-- Admin Header -->
     <top>
-        <HBox styleClass="header-bar-admin" alignment="CENTER_LEFT">
-            <Label text="🛡️" style="-fx-font-size: 24px;"/>
-            <Label text="ADMIN DASHBOARD" styleClass="header-title"/>
+        <HBox styleClass="header-bar-admin" alignment="CENTER_LEFT" spacing="16">
+            <Label text="🛡️" style="-fx-font-size: 28px;"/>
+            <VBox spacing="2">
+                <Label text="Admin Dashboard" styleClass="header-title"/>
+                <Label text="Manage vehicles, reservations and more" styleClass="header-subtitle"/>
+            </VBox>
+            
             <Region HBox.hgrow="ALWAYS"/>
-            <Button text="Logout" onAction="#handleLogout" styleClass="button"/>
+            
+            <HBox spacing="12" alignment="CENTER_RIGHT">
+                <Button text="↻ Refresh All" 
+                        onAction="#refreshData"
+                        styleClass="button"
+                        style="-fx-padding: 10 20;"/>
+                
+                <Button text="🚪 Sign Out" 
+                        onAction="#handleLogout" 
+                        styleClass="button-danger"
+                        style="-fx-padding: 10 20;"/>
+            </HBox>
         </HBox>
     </top>
 
@@ -24,53 +39,149 @@
     <center>
         <TabPane styleClass="tab-pane">
             
-            <!-- Manage Cars Tab -->
+            <!-- ==================== MANAGE CARS TAB ==================== -->
             <Tab text="🚗  Manage Cars" closable="false">
-                <VBox spacing="16" style="-fx-padding: 20;">
+                <VBox styleClass="content-body" spacing="20">
                     
-                    <!-- Cars Table -->
-                    <TableView fx:id="carTable" VBox.vgrow="ALWAYS" styleClass="table-view">
-                        <columns>
-                            <TableColumn fx:id="colCarId" text="ID" prefWidth="60"/>
-                            <TableColumn fx:id="colModel" text="Model" prefWidth="280"/>
-                            <TableColumn fx:id="colStatus" text="Status" prefWidth="120"/>
-                        </columns>
-                    </TableView>
+                    <!-- Stats Row (Optional Visual Enhancement) -->
+                    <HBox spacing="20">
+                        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+                            <Label text="Total Cars" styleClass="stat-label"/>
+                            <Label text="—" styleClass="stat-value"/>
+                        </VBox>
+                        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+                            <Label text="Available" styleClass="stat-label"/>
+                            <Label text="—" styleClass="stat-value" style="-fx-text-fill: #10b981;"/>
+                        </VBox>
+                        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+                            <Label text="In Maintenance" styleClass="stat-label"/>
+                            <Label text="—" styleClass="stat-value" style="-fx-text-fill: #f59e0b;"/>
+                        </VBox>
+                        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+                            <Label text="Rented" styleClass="stat-label"/>
+                            <Label text="—" styleClass="stat-value" style="-fx-text-fill: #6366f1;"/>
+                        </VBox>
+                    </HBox>
+                    
+                    <!-- Cars Table Card -->
+                    <VBox styleClass="card" VBox.vgrow="ALWAYS">
+                        
+                        <!-- Card Header -->
+                        <HBox styleClass="card-header" alignment="CENTER_LEFT">
+                            <VBox spacing="4">
+                                <Label text="Vehicle Inventory" styleClass="card-title"/>
+                                <Label text="Add, edit, or remove vehicles from your fleet" styleClass="card-subtitle"/>
+                            </VBox>
+                        </HBox>
+                        
+                        <!-- Table -->
+                        <TableView fx:id="carTable" VBox.vgrow="ALWAYS" styleClass="table-view">
+                            <VBox.margin>
+                                <Insets top="16"/>
+                            </VBox.margin>
+                            <columns>
+                                <TableColumn fx:id="colCarId" text="ID" prefWidth="80"/>
+                                <TableColumn fx:id="colModel" text="Model" prefWidth="350"/>
+                                <TableColumn fx:id="colStatus" text="Status" prefWidth="180"/>
+                            </columns>
+                        </TableView>
+                        
+                    </VBox>
 
                     <!-- Action Bar -->
-                    <HBox spacing="12" alignment="CENTER_LEFT" style="-fx-background-color: #1e293b; -fx-padding: 16; -fx-background-radius: 12;">
-                        <TextField fx:id="modelField" promptText="Car Model" prefWidth="180" styleClass="text-field"/>
-                        <TextField fx:id="categoryField" promptText="Category" prefWidth="140" styleClass="text-field"/>
-                        <TextField fx:id="priceField" promptText="Price (MAD)" prefWidth="120" styleClass="text-field"/>
+                    <HBox styleClass="action-bar" alignment="CENTER_LEFT" spacing="16">
+                        
+                        <!-- Input Fields -->
+                        <VBox spacing="4">
+                            <Label text="Model" styleClass="label-muted" style="-fx-font-size: 11px;"/>
+                            <TextField fx:id="modelField" 
+                                       promptText="e.g., Toyota Corolla" 
+                                       prefWidth="200"
+                                       styleClass="text-field"
+                                       style="-fx-pref-height: 42;"/>
+                        </VBox>
+                        
+                        <VBox spacing="4">
+                            <Label text="Category" styleClass="label-muted" style="-fx-font-size: 11px;"/>
+                            <TextField fx:id="categoryField" 
+                                       promptText="e.g., Sedan" 
+                                       prefWidth="150"
+                                       styleClass="text-field"
+                                       style="-fx-pref-height: 42;"/>
+                        </VBox>
+                        
+                        <VBox spacing="4">
+                            <Label text="Price (MAD/day)" styleClass="label-muted" style="-fx-font-size: 11px;"/>
+                            <TextField fx:id="priceField" 
+                                       promptText="e.g., 350" 
+                                       prefWidth="130"
+                                       styleClass="text-field"
+                                       style="-fx-pref-height: 42;"/>
+                        </VBox>
 
                         <Region HBox.hgrow="ALWAYS"/>
 
-                        <Button text="➕ Add Car" onAction="#handleAddCar" styleClass="button-success"/>
-                        <Button text="🔄 Toggle Status" onAction="#handleToggleStatus" styleClass="button-warning"/>
-                        <Button text="🗑️ Delete" onAction="#handleDeleteCar" styleClass="button-danger"/>
+                        <!-- Action Buttons -->
+                        <HBox spacing="12" alignment="CENTER_RIGHT">
+                            <Button text="➕ Add Car" 
+                                    onAction="#handleAddCar" 
+                                    styleClass="button-success"
+                                    style="-fx-padding: 12 24;"/>
+                            
+                            <Button text="🔄 Toggle Status" 
+                                    onAction="#handleToggleStatus" 
+                                    styleClass="button-warning"
+                                    style="-fx-padding: 12 20;"/>
+                            
+                            <Button text="🗑️ Delete" 
+                                    onAction="#handleDeleteCar" 
+                                    styleClass="button-danger"
+                                    style="-fx-padding: 12 20;"/>
+                        </HBox>
+                        
                     </HBox>
+                    
                 </VBox>
             </Tab>
 
-            <!-- Reservations Tab -->
+            <!-- ==================== RESERVATIONS TAB ==================== -->
             <Tab text="📋  All Reservations" closable="false">
-                <VBox spacing="16" style="-fx-padding: 20;">
+                <VBox styleClass="content-body" spacing="20">
                     
-                    <!-- Header Actions -->
-                    <HBox alignment="CENTER_RIGHT">
-                        <Button text="↻ Refresh List" onAction="#refreshData" styleClass="button-primary"/>
-                    </HBox>
-
-                    <!-- Reservations Table -->
-                    <TableView fx:id="resTable" VBox.vgrow="ALWAYS" styleClass="table-view">
-                        <columns>
-                            <TableColumn fx:id="colResId" text="Res ID" prefWidth="80"/>
-                            <TableColumn fx:id="colUserName" text="Customer Name" prefWidth="200"/>
-                            <TableColumn fx:id="colUserPhone" text="Phone" prefWidth="140"/>
-                            <TableColumn fx:id="colResCarId" text="Car ID" prefWidth="80"/>
-                            <TableColumn fx:id="colCost" text="Total Cost" prefWidth="120"/>
-                        </columns>
-                    </TableView>
+                    <!-- Reservations Table Card -->
+                    <VBox styleClass="card" VBox.vgrow="ALWAYS">
+                        
+                        <!-- Card Header -->
+                        <HBox styleClass="card-header" alignment="CENTER_LEFT">
+                            <VBox spacing="4">
+                                <Label text="Customer Reservations" styleClass="card-title"/>
+                                <Label text="View all active and past reservations" styleClass="card-subtitle"/>
+                            </VBox>
+                            
+                            <Region HBox.hgrow="ALWAYS"/>
+                            
+                            <Button text="↻ Refresh List" 
+                                    onAction="#refreshData" 
+                                    styleClass="button-primary"
+                                    style="-fx-padding: 10 24;"/>
+                        </HBox>
+                        
+                        <!-- Reservations Table -->
+                        <TableView fx:id="resTable" VBox.vgrow="ALWAYS" styleClass="table-view">
+                            <VBox.margin>
+                                <Insets top="16"/>
+                            </VBox.margin>
+                            <columns>
+                                <TableColumn fx:id="colResId" text="Reservation ID" prefWidth="120"/>
+                                <TableColumn fx:id="colUserName" text="Customer Name" prefWidth="220"/>
+                                <TableColumn fx:id="colUserPhone" text="Phone" prefWidth="160"/>
+                                <TableColumn fx:id="colResCarId" text="Car ID" prefWidth="100"/>
+                                <TableColumn fx:id="colCost" text="Total Cost (MAD)" prefWidth="150"/>
+                            </columns>
+                        </TableView>
+                        
+                    </VBox>
+                    
                 </VBox>
             </Tab>
 

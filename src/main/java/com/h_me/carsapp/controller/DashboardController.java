@@ -1,5 +1,8 @@
 package com.h_me.carsapp.controller;
 
+import animatefx.animation.FadeIn;
+import animatefx.animation.SlideInRight;
+import animatefx.animation.SlideInLeft;
 import com.h_me.carsapp.dao.VehicleDAO;
 import com.h_me.carsapp.model.Vehicle;
 import com.h_me.carsapp.service.ReservationService;
@@ -11,6 +14,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -47,18 +51,25 @@ public class DashboardController {
         colPrice.setCellValueFactory(new PropertyValueFactory<>("priceRental"));
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
 
+        // Custom status cell with color coding
         colStatus.setCellFactory(column -> new TableCell<Vehicle, String>() {
             @Override
             protected void updateItem(String status, boolean empty) {
                 super.updateItem(status, empty);
                 if (empty || getTableRow() == null || getTableRow().getItem() == null) {
                     setText(null);
+                    setStyle("");
                 } else {
                     Vehicle v = getTableRow().getItem();
                     if (v.getAvailableFrom() != null && v.getAvailableFrom().isAfter(LocalDateTime.now())) {
                         setText("Unavailable until " + v.getAvailableFrom().toLocalDate());
+                        setStyle("-fx-text-fill: #f59e0b; -fx-font-weight: 600;");
+                    } else if ("AVAILABLE".equalsIgnoreCase(status)) {
+                        setText(status);
+                        setStyle("-fx-text-fill: #10b981; -fx-font-weight: 600;");
                     } else {
                         setText(status);
+                        setStyle("-fx-text-fill: #94a3b8;");
                     }
                 }
             }
@@ -72,6 +83,9 @@ public class DashboardController {
         List<Vehicle> data = vehicleDAO.getAllAvailableVehicles();
         vehicleList = FXCollections.observableArrayList(data);
         vehicleTable.setItems(vehicleList);
+        
+        // Add subtle animation when data loads
+        new FadeIn(vehicleTable).setSpeed(2.0).play();
     }
 
     @FXML
@@ -115,7 +129,6 @@ public class DashboardController {
         if (days < 1) days = 1;
         double estimatedCost = days * selectedCar.getPriceRental();
 
-        // --- USER ID CHECK ---
         UserSession session = UserSession.getInstance();
         if (session == null || session.getUser() == null) {
             StyledAlert.error("Not Logged In", "Please log out and log in again.");
@@ -129,7 +142,7 @@ public class DashboardController {
             if (success) {
                 String msg = String.format("Car: %s\nDays: %d\nTotal: %.2f MAD", selectedCar.getName(), days, estimatedCost);
                 StyledAlert.success("Reservation Confirmed!", msg);
-                loadData(); // Refresh table to remove rented car
+                loadData();
             } else {
                 StyledAlert.error("Rental Failed", "Check the Console for Database Errors.");
             }
@@ -145,20 +158,30 @@ public class DashboardController {
     @FXML
     public void handleLogout(ActionEvent event) throws IOException {
         UserSession.cleanUserSession();
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/h_me/carsapp/view/login-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 400, 400);
+        
         Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/h_me/carsapp/view/login-view.fxml"));
+        Parent root = loader.load();
+        
+        // Fade animation for logout
+        new FadeIn(root).setSpeed(1.5).play();
+        
+        Scene scene = stage.getScene();
+        scene.setRoot(root);
         stage.setTitle("Login - H-Me Cars");
-        stage.setScene(scene);
-        stage.show();
     }
 
     @FXML
     public void goToDealerships(ActionEvent event) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/h_me/carsapp/view/dealership-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 900, 600);
         Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
-        stage.setScene(scene);
-        stage.show();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/h_me/carsapp/view/dealership-view.fxml"));
+        Parent root = loader.load();
+        
+        // Slide right animation
+        new SlideInRight(root).setSpeed(2.0).play();
+        
+        Scene scene = stage.getScene();
+        scene.setRoot(root);
+        stage.setTitle("Dealership Locator - H-Me Cars");
     }
 }

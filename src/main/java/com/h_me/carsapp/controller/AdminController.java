@@ -1,5 +1,6 @@
 package com.h_me.carsapp.controller;
 
+import animatefx.animation.FadeIn;
 import com.h_me.carsapp.dao.ReservationDAO;
 import com.h_me.carsapp.dao.VehicleDAO;
 import com.h_me.carsapp.model.Reservation;
@@ -10,6 +11,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -46,13 +48,36 @@ public class AdminController {
         colCarId.setCellValueFactory(new PropertyValueFactory<>("vehicleID"));
         colModel.setCellValueFactory(new PropertyValueFactory<>("name"));
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+        
+        // Status column with color coding
+        colStatus.setCellFactory(column -> new TableCell<Vehicle, String>() {
+            @Override
+            protected void updateItem(String status, boolean empty) {
+                super.updateItem(status, empty);
+                if (empty || status == null) {
+                    setText(null);
+                    setStyle("");
+                } else {
+                    setText(status);
+                    if ("AVAILABLE".equalsIgnoreCase(status)) {
+                        setStyle("-fx-text-fill: #10b981; -fx-font-weight: 600;");
+                    } else if ("MAINTENANCE".equalsIgnoreCase(status)) {
+                        setStyle("-fx-text-fill: #f59e0b; -fx-font-weight: 600;");
+                    } else if ("RENTED".equalsIgnoreCase(status)) {
+                        setStyle("-fx-text-fill: #6366f1; -fx-font-weight: 600;");
+                    } else {
+                        setStyle("-fx-text-fill: #94a3b8;");
+                    }
+                }
+            }
+        });
 
         // Reservation Columns
         colResId.setCellValueFactory(new PropertyValueFactory<>("reservationID"));
         colResCarId.setCellValueFactory(new PropertyValueFactory<>("vehicleID"));
         colCost.setCellValueFactory(new PropertyValueFactory<>("totalCost"));
 
-        // Bind new columns to the fields we added in Reservation.java
+        // Bind user detail columns
         colUserName.setCellValueFactory(new PropertyValueFactory<>("userName"));
         colUserPhone.setCellValueFactory(new PropertyValueFactory<>("userPhone"));
 
@@ -63,6 +88,10 @@ public class AdminController {
     public void refreshData() {
         carTable.setItems(FXCollections.observableArrayList(vehicleDAO.getAllAvailableVehicles()));
         resTable.setItems(FXCollections.observableArrayList(reservationDAO.getAllReservationsWithDetails()));
+        
+        // Add subtle animation
+        new FadeIn(carTable).setSpeed(2.0).play();
+        new FadeIn(resTable).setSpeed(2.0).play();
     }
 
     @FXML
@@ -74,7 +103,7 @@ public class AdminController {
 
             try {
                 vehicleDAO.updateVehicleStatus(selected.getVehicleID(), newStatus);
-                refreshData(); // Refresh to see change
+                refreshData();
                 StyledAlert.success("Status Updated", "Car has been marked as " + newStatus);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -94,10 +123,12 @@ public class AdminController {
         
         try {
             Vehicle v = new Vehicle();
-            v.setName(modelField.getText());
-            v.setCategory(categoryField.getText());
-            v.setPriceRental(Double.parseDouble(priceField.getText()));
-            v.setPricePurchase(0); v.setDealershipID(1); v.setManufactureID(1);
+            v.setName(modelField.getText().trim());
+            v.setCategory(categoryField.getText().trim());
+            v.setPriceRental(Double.parseDouble(priceField.getText().trim()));
+            v.setPricePurchase(0); 
+            v.setDealershipID(1); 
+            v.setManufactureID(1);
             v.setStatus("AVAILABLE");
             vehicleDAO.addVehicle(v);
             refreshData();
@@ -123,14 +154,23 @@ public class AdminController {
         }
     }
 
-    private void clearFields() { modelField.clear(); categoryField.clear(); priceField.clear(); }
+    private void clearFields() { 
+        modelField.clear(); 
+        categoryField.clear(); 
+        priceField.clear(); 
+    }
 
     @FXML
     public void handleLogout(ActionEvent event) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/h_me/carsapp/view/login-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 400, 400);
         Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
-        stage.setScene(scene);
-        stage.show();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/h_me/carsapp/view/login-view.fxml"));
+        Parent root = loader.load();
+        
+        // Fade animation for logout
+        new FadeIn(root).setSpeed(1.5).play();
+        
+        Scene scene = stage.getScene();
+        scene.setRoot(root);
+        stage.setTitle("Login - H-Me Cars");
     }
 }

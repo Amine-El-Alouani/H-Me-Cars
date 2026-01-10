@@ -1,5 +1,7 @@
 package com.h_me.carsapp.controller;
 
+import animatefx.animation.FadeIn;
+import animatefx.animation.Shake;
 import com.h_me.carsapp.dao.UserDAO;
 import com.h_me.carsapp.model.User;
 import com.h_me.carsapp.utils.StyledAlert;
@@ -7,6 +9,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
@@ -26,23 +29,39 @@ public class RegisterController {
 
     @FXML
     public void handleRegister(ActionEvent event) {
-        if(emailField.getText().isEmpty() || passwordField.getText().isEmpty()) {
-            StyledAlert.error("Missing Fields", "Please fill all fields to create your account.");
+        // Validate all fields
+        if (firstNameField.getText().isEmpty() || lastNameField.getText().isEmpty()) {
+            StyledAlert.warning("Missing Information", "Please enter your first and last name.");
+            shakeField(firstNameField);
+            shakeField(lastNameField);
+            return;
+        }
+
+        if (phoneField.getText().isEmpty()) {
+            StyledAlert.warning("Missing Information", "Please enter your phone number.");
+            shakeField(phoneField);
+            return;
+        }
+
+        if (emailField.getText().isEmpty() || passwordField.getText().isEmpty()) {
+            StyledAlert.warning("Missing Information", "Please enter your email and password.");
+            shakeField(emailField);
+            shakeField(passwordField);
             return;
         }
 
         try {
             User u = new User();
             int randomId = 100000 + new Random().nextInt(900000);
-            u.setUserID(String.valueOf(randomId)); // Set as String for User Model
+            u.setUserID(String.valueOf(randomId));
 
-            u.setFirstName(firstNameField.getText());
-            u.setLastName(lastNameField.getText());
-            u.setPhoneNum(Integer.parseInt(phoneField.getText()));
-            u.setEmail(emailField.getText());
+            u.setFirstName(firstNameField.getText().trim());
+            u.setLastName(lastNameField.getText().trim());
+            u.setPhoneNum(Integer.parseInt(phoneField.getText().trim()));
+            u.setEmail(emailField.getText().trim());
             u.setPassword(passwordField.getText());
 
-            if(userDAO.registerUser(u)) {
+            if (userDAO.registerUser(u)) {
                 StyledAlert.success("Account Created!", "Your account has been created successfully. Please sign in to continue.");
                 goToLogin(event);
             } else {
@@ -50,18 +69,27 @@ public class RegisterController {
             }
         } catch (NumberFormatException e) {
             StyledAlert.error("Invalid Phone", "Phone number must contain only digits.");
+            shakeField(phoneField);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    private void shakeField(TextField field) {
+        new Shake(field).play();
+    }
+
     @FXML
     public void goToLogin(ActionEvent event) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/h_me/carsapp/view/login-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 400, 400);
         Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/h_me/carsapp/view/login-view.fxml"));
+        Parent root = loader.load();
+        
+        // Fade in animation
+        new FadeIn(root).setSpeed(1.5).play();
+        
+        Scene scene = stage.getScene();
+        scene.setRoot(root);
         stage.setTitle("Login - H-Me Cars");
-        stage.setScene(scene);
-        stage.show();
     }
 }

@@ -1,70 +1,185 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.geometry.Insets?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.h_me.carsapp.controller.DashboardController"
             stylesheets="@../styles.css"
-            style="-fx-background-color: #0f172a;"
-            prefHeight="700.0" prefWidth="1000.0">
+            styleClass="root-container">
 
-    <!-- Header -->
-    <top>
-        <HBox styleClass="header-bar" alignment="CENTER_LEFT">
-            <Label text="🚗" style="-fx-font-size: 24px;"/>
-            <Label text="H-Me Cars" styleClass="header-title"/>
+    <!-- Left Sidebar -->
+    <left>
+        <VBox styleClass="sidebar">
             
-            <Region HBox.hgrow="ALWAYS"/>
-            
-            <HBox spacing="12" alignment="CENTER">
-                <TextField fx:id="searchField" promptText="Search cars..." prefWidth="220" styleClass="text-field"/>
-                <Button text="Search" onAction="#handleSearch" styleClass="button"/>
-                <Button text="↻ Refresh" onAction="#loadData" styleClass="button"/>
+            <!-- Brand Header -->
+            <HBox styleClass="sidebar-header" alignment="CENTER_LEFT" spacing="12">
+                <Label text="🚗" styleClass="sidebar-logo"/>
+                <VBox spacing="2">
+                    <Label text="H-Me Cars" styleClass="sidebar-brand"/>
+                    <Label text="Car Rental Service" styleClass="label-muted" style="-fx-font-size: 11px;"/>
+                </VBox>
             </HBox>
             
-            <Region prefWidth="20"/>
+            <!-- Navigation Section -->
+            <VBox spacing="4">
+                <VBox.margin>
+                    <Insets top="24"/>
+                </VBox.margin>
+                
+                <Label text="NAVIGATION" styleClass="sidebar-section-title"/>
+                
+                <Button text="🏠  Dashboard" 
+                        styleClass="sidebar-nav-item, sidebar-nav-item-active"
+                        maxWidth="Infinity"
+                        alignment="CENTER_LEFT"/>
+                
+                <Button text="📍  Dealerships" 
+                        onAction="#goToDealerships"
+                        styleClass="sidebar-nav-item"
+                        maxWidth="Infinity"
+                        alignment="CENTER_LEFT"/>
+            </VBox>
             
-            <Button text="Logout" onAction="#handleLogout" styleClass="button-danger"/>
-        </HBox>
-    </top>
+            <!-- Quick Actions -->
+            <VBox spacing="4">
+                <VBox.margin>
+                    <Insets top="24"/>
+                </VBox.margin>
+                
+                <Label text="QUICK ACTIONS" styleClass="sidebar-section-title"/>
+                
+                <Button text="↻  Refresh List" 
+                        onAction="#loadData"
+                        styleClass="sidebar-nav-item"
+                        maxWidth="Infinity"
+                        alignment="CENTER_LEFT"/>
+            </VBox>
+            
+            <!-- Spacer -->
+            <Region VBox.vgrow="ALWAYS"/>
+            
+            <!-- User Info & Logout -->
+            <VBox spacing="16">
+                <Region styleClass="divider"/>
+                
+                <Button text="🚪  Sign Out" 
+                        onAction="#handleLogout"
+                        styleClass="sidebar-nav-item"
+                        maxWidth="Infinity"
+                        alignment="CENTER_LEFT"
+                        style="-fx-text-fill: #f43f5e;"/>
+            </VBox>
+            
+        </VBox>
+    </left>
 
-    <!-- Main Content - Vehicle Table -->
+    <!-- Main Content Area -->
     <center>
-        <VBox style="-fx-padding: 20;">
-            <TableView fx:id="vehicleTable" VBox.vgrow="ALWAYS" styleClass="table-view">
-                <columns>
-                    <TableColumn fx:id="colName" text="Model" prefWidth="200"/>
-                    <TableColumn fx:id="colCategory" text="Category" prefWidth="140"/>
-                    <TableColumn fx:id="colPrice" text="Daily Price (MAD)" prefWidth="150"/>
-                    <TableColumn fx:id="colStatus" text="Status" prefWidth="120"/>
-                </columns>
-            </TableView>
+        <VBox styleClass="main-content">
+            
+            <!-- Header Bar -->
+            <HBox styleClass="content-header" alignment="CENTER_LEFT">
+                <VBox spacing="4">
+                    <Label text="Available Vehicles" styleClass="heading"/>
+                    <Label text="Browse and rent from our premium car collection" styleClass="label-muted"/>
+                </VBox>
+                
+                <Region HBox.hgrow="ALWAYS"/>
+                
+                <!-- Search Bar -->
+                <HBox styleClass="search-bar" alignment="CENTER_LEFT" spacing="10" prefWidth="320">
+                    <Label text="🔍" styleClass="search-icon"/>
+                    <TextField fx:id="searchField" 
+                               promptText="Search by model or category..."
+                               styleClass="search-input"
+                               HBox.hgrow="ALWAYS"/>
+                    <Button text="Search" 
+                            onAction="#handleSearch"
+                            styleClass="button"
+                            style="-fx-padding: 10 20;"/>
+                </HBox>
+            </HBox>
+            
+            <!-- Content Body - Vehicle Table -->
+            <VBox styleClass="content-body" VBox.vgrow="ALWAYS">
+                <VBox styleClass="card" VBox.vgrow="ALWAYS">
+                    
+                    <!-- Card Header -->
+                    <HBox styleClass="card-header" alignment="CENTER_LEFT">
+                        <VBox spacing="4">
+                            <Label text="Car Fleet" styleClass="card-title"/>
+                            <Label text="Select a vehicle to rent" styleClass="card-subtitle"/>
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button text="↻ Refresh" 
+                                onAction="#loadData"
+                                styleClass="button"
+                                style="-fx-padding: 8 16; -fx-font-size: 13px;"/>
+                    </HBox>
+                    
+                    <!-- Table -->
+                    <TableView fx:id="vehicleTable" VBox.vgrow="ALWAYS" styleClass="table-view">
+                        <VBox.margin>
+                            <Insets top="16"/>
+                        </VBox.margin>
+                        <columns>
+                            <TableColumn fx:id="colName" text="Model" prefWidth="280"/>
+                            <TableColumn fx:id="colCategory" text="Category" prefWidth="180"/>
+                            <TableColumn fx:id="colPrice" text="Daily Price (MAD)" prefWidth="160"/>
+                            <TableColumn fx:id="colStatus" text="Status" prefWidth="200"/>
+                        </columns>
+                    </TableView>
+                    
+                </VBox>
+            </VBox>
+            
         </VBox>
     </center>
 
-    <!-- Footer - Booking Actions -->
+    <!-- Bottom Action Bar -->
     <bottom>
-        <HBox styleClass="footer-bar" alignment="CENTER_RIGHT">
-            <HBox spacing="12" alignment="CENTER_LEFT">
-                <Label text="Start Date"/>
-                <DatePicker fx:id="startDatePicker" prefWidth="140"/>
-            </HBox>
+        <HBox styleClass="footer-bar" alignment="CENTER">
             
-            <HBox spacing="12" alignment="CENTER_LEFT">
-                <padding><Insets left="20"/></padding>
-                <Label text="End Date"/>
-                <DatePicker fx:id="endDatePicker" prefWidth="140"/>
+            <!-- Date Selection -->
+            <HBox spacing="24" alignment="CENTER_LEFT">
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="📅" style="-fx-font-size: 16px;"/>
+                    <VBox spacing="4">
+                        <Label text="Start Date" styleClass="label-muted" style="-fx-font-size: 11px;"/>
+                        <DatePicker fx:id="startDatePicker" prefWidth="150"/>
+                    </VBox>
+                </HBox>
+                
+                <Label text="→" style="-fx-font-size: 20px; -fx-text-fill: #64748b;"/>
+                
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="📅" style="-fx-font-size: 16px;"/>
+                    <VBox spacing="4">
+                        <Label text="End Date" styleClass="label-muted" style="-fx-font-size: 11px;"/>
+                        <DatePicker fx:id="endDatePicker" prefWidth="150"/>
+                    </VBox>
+                </HBox>
             </HBox>
             
             <Region HBox.hgrow="ALWAYS"/>
             
-            <HBox spacing="12">
-                <Button text="📍 Locate Dealerships" onAction="#goToDealerships" styleClass="button"/>
-                <Button text="🔑 Rent Selected Car" onAction="#handleRent" styleClass="button-success" prefHeight="44"/>
+            <!-- Action Buttons -->
+            <HBox spacing="16" alignment="CENTER_RIGHT">
+                <Button text="📍 Locate Dealerships" 
+                        onAction="#goToDealerships"
+                        styleClass="button"
+                        prefHeight="48"/>
+                
+                <Button text="🔑  Rent Selected Car" 
+                        onAction="#handleRent"
+                        styleClass="button-success"
+                        prefHeight="48"
+                        style="-fx-padding: 14 32; -fx-font-size: 15px;"/>
             </HBox>
+            
         </HBox>
     </bottom>
 
