@@ -220,20 +220,17 @@ public class DashboardController {
     }
     
     private Image getImageForVehicle(Vehicle vehicle) {
-        // First, check VehicleImageStore (local JSON config)
-        String storedPath = VehicleImageStore.getImageByName(vehicle.getName());
-        if (storedPath != null && !storedPath.isEmpty()) {
+        // First, check for image data from database (shared across all users)
+        if (vehicle.getImageData() != null && vehicle.getImageData().length > 0) {
             try {
-                java.io.File imageFile = new java.io.File(storedPath);
-                if (imageFile.exists()) {
-                    return new Image(imageFile.toURI().toString(), 200, 110, false, true);
-                }
+                java.io.ByteArrayInputStream bis = new java.io.ByteArrayInputStream(vehicle.getImageData());
+                return new Image(bis, 200, 110, false, true);
             } catch (Exception e) {
-                System.out.println("Could not load stored image: " + storedPath);
+                System.out.println("Could not load database image: " + e.getMessage());
             }
         }
         
-        // Then try vehicle.imagePath field
+        // Then try local file path (for backwards compatibility)
         if (vehicle.getImagePath() != null && !vehicle.getImagePath().isEmpty()) {
             try {
                 java.io.File imageFile = new java.io.File(vehicle.getImagePath());
@@ -241,7 +238,7 @@ public class DashboardController {
                     return new Image(imageFile.toURI().toString(), 200, 110, false, true);
                 }
             } catch (Exception e) {
-                System.out.println("Could not load vehicle image: " + vehicle.getImagePath());
+                System.out.println("Could not load local image: " + vehicle.getImagePath());
             }
         }
         

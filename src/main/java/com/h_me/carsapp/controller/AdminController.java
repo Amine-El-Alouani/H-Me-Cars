@@ -186,6 +186,9 @@ public class AdminController {
         }
         
         try {
+            // Ensure image column exists in database
+            vehicleDAO.ensureImageColumn();
+            
             Vehicle v = new Vehicle();
             v.setName(modelField.getText().trim());
             v.setCategory(categoryField.getText().trim());
@@ -195,23 +198,12 @@ public class AdminController {
             v.setManufactureID(0); // Set to 0 = NULL in database
             v.setStatus("AVAILABLE");
             
-            // Handle image if selected
+            // Handle image if selected - read as bytes for database storage
             if (selectedImageFile != null) {
-                // Get images directory from VehicleImageStore
-                Path imagesDir = VehicleImageStore.getImagesDir();
-                Files.createDirectories(imagesDir);
-                
-                // Generate unique filename based on model name
-                String cleanName = v.getName().replaceAll("[^a-zA-Z0-9]", "_").toLowerCase();
-                String extension = selectedImageFile.getName().substring(selectedImageFile.getName().lastIndexOf('.'));
-                String newFileName = cleanName + "_" + System.currentTimeMillis() + extension;
-                
-                // Copy file to images directory
-                Path targetPath = imagesDir.resolve(newFileName);
-                Files.copy(selectedImageFile.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
-                
-                // Save to VehicleImageStore (by name, since we don't have ID yet)
-                VehicleImageStore.saveImageForName(v.getName(), targetPath.toString());
+                // Read file as bytes for database storage
+                byte[] imageBytes = Files.readAllBytes(selectedImageFile.toPath());
+                v.setImageData(imageBytes);
+                System.out.println("Image loaded: " + imageBytes.length + " bytes");
             }
             
             vehicleDAO.addVehicle(v);

@@ -10,10 +10,9 @@ import java.util.List;
 
 public class VehicleDAO {
 
-
     public List<Vehicle> getAllAvailableVehicles() {
         List<Vehicle> list = new ArrayList<>();
-        // Fetch all vehicles, and find the latest future end date for reservations using Java's time
+        // Fetch all vehicles with image data
         String sql = "SELECT v.*, " +
                      "(SELECT MAX(r.enddate) FROM reservations r WHERE r.vehicleid = v.vehicleid AND r.enddate >= ?) as reserved_until " +
                      "FROM vehicles v";
@@ -26,15 +25,22 @@ public class VehicleDAO {
 
             while (rs.next()) {
                 Vehicle v = new Vehicle();
-                // Map DB columns (lowercase) to Java fields
-                v.setVehicleID(rs.getInt("vehicleid"));       // DB: vehicleid
-                v.setName(rs.getString("model"));             // DB: model -> Java: name
+                v.setVehicleID(rs.getInt("vehicleid"));
+                v.setName(rs.getString("model"));
                 v.setCategory(rs.getString("category"));
-                v.setPricePurchase(rs.getDouble("pricepurchase")); // DB: pricepurchase
-                v.setPriceRental(rs.getDouble("pricerental"));     // DB: pricerental
+                v.setPricePurchase(rs.getDouble("pricepurchase"));
+                v.setPriceRental(rs.getDouble("pricerental"));
                 v.setStatus(rs.getString("status"));
-                v.setDealershipID(rs.getInt("dealershipid"));      // DB: dealershipid
-                v.setManufactureID(rs.getInt("manufacturerid"));   // DB: manufacturerid
+                v.setDealershipID(rs.getInt("dealershipid"));
+                v.setManufactureID(rs.getInt("manufacturerid"));
+                
+                // Load image data if column exists
+                try {
+                    byte[] imageData = rs.getBytes("image");
+                    v.setImageData(imageData);
+                } catch (SQLException e) {
+                    // Column doesn't exist yet, ignore
+                }
                 
                 Timestamp reservedUntil = rs.getTimestamp("reserved_until");
                 if (reservedUntil != null) {
@@ -69,6 +75,14 @@ public class VehicleDAO {
                 v.setStatus(rs.getString("status"));
                 v.setDealershipID(rs.getInt("dealershipid"));
                 v.setManufactureID(rs.getInt("manufacturerid"));
+                
+                try {
+                    byte[] imageData = rs.getBytes("image");
+                    v.setImageData(imageData);
+                } catch (SQLException e) {
+                    // Column doesn't exist yet
+                }
+                
                 list.add(v);
             }
         } catch (SQLException e) {
@@ -89,7 +103,21 @@ public class VehicleDAO {
             newVehicleId = rs.getInt(1);
         }
         
-        String sql = "INSERT INTO vehicles (vehicleid, model, category, pricepurchase, pricerental, status, dealershipid, manufacturerid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        // Check if image column exists, if so include it
+        boolean hasImageColumn = checkImageColumnExists();
+        boolean hasImage = v.getImageData() != null && v.getImageData().length > 0;
+        
+        System.out.println("DEBUG: Image column exists: " + hasImageColumn);
+        System.out.println("DEBUG: Vehicle has image data: " + hasImage + (hasImage ? " (" + v.getImageData().length + " bytes)" : ""));
+        
+        String sql;
+        if (hasImageColumn && hasImage) {
+            sql = "INSERT INTO vehicles (vehicleid, model, category, pricepurchase, pricerental, status, dealershipid, manufacturerid, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        } else {
+            sql = "INSERT INTO vehicles (vehicleid, model, category, pricepurchase, pricerental, status, dealershipid, manufacturerid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        }
+        
+        System.out.println("DEBUG: Using SQL: " + (hasImageColumn && hasImage ? "with image" : "without image"));
 
         try (Connection conn = PostgresConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -113,6 +141,12 @@ public class VehicleDAO {
             } else {
                 stmt.setNull(8, java.sql.Types.INTEGER);
             }
+            
+            // Set image data if column exists and we have data
+            if (hasImageColumn && hasImage) {
+                stmt.setBytes(9, v.getImageData());
+                System.out.println("DEBUG: Setting image bytes in prepared statement");
+            }
 
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected > 0) {
@@ -122,8 +156,36 @@ public class VehicleDAO {
             }
         }
     }
-
-
+    
+    /**
+     * Check if the image column exists in the vehicles table
+     */
+    private boolean checkImageColumnExists() {
+        String sql = "SELECT column_name FROM information_schema.columns WHERE table_name = 'vehicles' AND column_name = 'image'";
+        try (Connection conn = PostgresConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            return rs.next();
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+    
+    /**
+     * Create the image column if it doesn't exist
+     */
+    public void ensureImageColumn() {
+        if (!checkImageColumnExists()) {
+            String sql = "ALTER TABLE vehicles ADD COLUMN image BYTEA";
+            try (Connection conn = PostgresConnection.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.executeUpdate();
+                System.out.println("Added 'image' column to vehicles table");
+            } catch (SQLException e) {
+                System.out.println("Could not add image column: " + e.getMessage());
+            }
+        }
+    }
 
     public void updateVehicleStatus(int vehicleId, String newStatus) {
         String sql = "UPDATE vehicles SET status = ? WHERE vehicleid = ?";

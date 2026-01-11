@@ -18,5 +18,6 @@ public class Vehicle {
     private int dealershipID;
     private int manufactureID;
     private java.time.LocalDateTime availableFrom;
-    private String imagePath; // Path to car image file
+    private String imagePath; // Path to car image file (local)
+    private byte[] imageData; // Image bytes stored in database
 }
