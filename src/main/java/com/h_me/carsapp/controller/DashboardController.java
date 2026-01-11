@@ -170,18 +170,14 @@ public class DashboardController {
         VBox content = new VBox(6);
         content.getStyleClass().add("vehicle-card-content");
         
-        // Vehicle name with brand logo
+        // Vehicle name with brand badge
         HBox nameBox = new HBox(6);
         nameBox.setAlignment(Pos.CENTER_LEFT);
         
-        // Try to get brand logo from internet
-        Image brandLogo = CarBrandDetector.getBrandLogo(vehicle.getName(), 20, 20);
-        if (brandLogo != null) {
-            ImageView logoView = new ImageView(brandLogo);
-            logoView.setFitWidth(18);
-            logoView.setFitHeight(18);
-            logoView.setPreserveRatio(true);
-            nameBox.getChildren().add(logoView);
+        // Try to create a brand badge (logo or text fallback)
+        javafx.scene.Node brandBadge = CarBrandDetector.createBrandBadge(vehicle.getName());
+        if (brandBadge != null) {
+            nameBox.getChildren().add(brandBadge);
         }
         
         Label nameLabel = new Label(vehicle.getName());
