@@ -1261,16 +1261,16 @@
 }
 
 .vehicle-card {
-    -fx-background-color: rgba(30, 41, 59, 0.85);
+    -fx-background-color: rgba(30, 41, 59, 0.95);
     -fx-background-radius: 16;
-    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-color: rgba(255, 255, 255, 0.1);
     -fx-border-radius: 16;
     -fx-border-width: 1;
-    -fx-pref-width: 200;
-    -fx-min-width: 200;
-    -fx-max-width: 200;
+    -fx-pref-width: 260;
+    -fx-min-width: 260;
+    -fx-max-width: 260;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 10, 0, 0, 4);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 15, 0, 0, 6);
 }
 
 .vehicle-card:hover {
@@ -1288,17 +1288,18 @@
 }
 
 .vehicle-card-image-container {
-    -fx-background-color: #1e293b;
-    -fx-background-radius: 16 16 0 0;
-    -fx-min-height: 110;
-    -fx-pref-height: 110;
+    -fx-background-color: linear-gradient(to bottom, #1e293b, #0f172a);
+    -fx-background-radius: 15 15 0 0;
+    -fx-min-height: 150;
+    -fx-pref-height: 150;
+    -fx-max-height: 150;
     -fx-alignment: center;
     -fx-padding: 0;
 }
 
 .vehicle-card-content {
-    -fx-padding: 10;
-    -fx-spacing: 6;
+    -fx-padding: 14;
+    -fx-spacing: 8;
 }
 
 .vehicle-card-name {

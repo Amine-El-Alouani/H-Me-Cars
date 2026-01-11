@@ -12,152 +12,149 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Detects car brand from vehicle name and provides brand badges.
- * Tries to fetch logos from network, falls back to text badges.
+ * Detects car brand from vehicle name and creates brand badges.
+ * Uses logo images from GitHub CDN (car-logos-dataset via jsDelivr).
+ * Falls back to text badges if image loading fails.
  */
 public class CarBrandDetector {
     
-    // Map of brand keywords to their info: [abbreviation, hex color, logo URL]
+    // Brand info: logo filename (from car-logos-dataset), abbreviation, color
     private static final Map<String, String[]> BRANDS = new HashMap<>();
     
-    // Cache for loaded logo images
+    // Cache for loaded logos
     private static final Map<String, Image> logoCache = new HashMap<>();
-    // Cache for failed URLs (to avoid retrying)
-    private static final Map<String, Boolean> failedUrls = new HashMap<>();
+    private static final Map<String, Boolean> failedLogos = new HashMap<>();
+    
+    // CDN base URL for car logos (from filippofilip95/car-logos-dataset)
+    private static final String LOGO_CDN = "https://raw.githubusercontent.com/filippofilip95/car-logos-dataset/master/logos/thumb/";
     
     static {
-        // Format: brand keyword -> [abbreviation, hex color, logo domain]
-        BRANDS.put("toyota", new String[]{"T", "#EB0A1E", "toyota.com"});
-        BRANDS.put("honda", new String[]{"H", "#CC0000", "honda.com"});
-        BRANDS.put("ford", new String[]{"F", "#003478", "ford.com"});
-        BRANDS.put("chevrolet", new String[]{"Ch", "#D4AA00", "chevrolet.com"});
-        BRANDS.put("chevy", new String[]{"Ch", "#D4AA00", "chevrolet.com"});
-        BRANDS.put("bmw", new String[]{"B", "#0066B1", "bmw.com"});
-        BRANDS.put("mercedes", new String[]{"M", "#00ADEF", "mercedes-benz.com"});
-        BRANDS.put("benz", new String[]{"M", "#00ADEF", "mercedes-benz.com"});
-        BRANDS.put("audi", new String[]{"A", "#BB0A30", "audi.com"});
-        BRANDS.put("volkswagen", new String[]{"VW", "#001E50", "volkswagen.com"});
-        BRANDS.put("vw", new String[]{"VW", "#001E50", "volkswagen.com"});
-        BRANDS.put("nissan", new String[]{"N", "#C3002F", "nissan.com"});
-        BRANDS.put("hyundai", new String[]{"H", "#002C5F", "hyundai.com"});
-        BRANDS.put("kia", new String[]{"K", "#05141F", "kia.com"});
-        BRANDS.put("mazda", new String[]{"M", "#101010", "mazda.com"});
-        BRANDS.put("subaru", new String[]{"S", "#013C91", "subaru.com"});
-        BRANDS.put("lexus", new String[]{"L", "#1A1A1A", "lexus.com"});
-        BRANDS.put("porsche", new String[]{"P", "#B12B28", "porsche.com"});
-        BRANDS.put("ferrari", new String[]{"Fe", "#FF2800", "ferrari.com"});
-        BRANDS.put("lamborghini", new String[]{"L", "#DDB321", "lamborghini.com"});
-        BRANDS.put("tesla", new String[]{"T", "#CC0000", "tesla.com"});
-        BRANDS.put("volvo", new String[]{"V", "#003057", "volvo.com"});
-        BRANDS.put("jaguar", new String[]{"J", "#1A472A", "jaguar.com"});
-        BRANDS.put("jeep", new String[]{"Jp", "#3A5A40", "jeep.com"});
-        BRANDS.put("dodge", new String[]{"D", "#BA0C2F", "dodge.com"});
-        BRANDS.put("ram", new String[]{"R", "#000000", "ramtrucks.com"});
-        BRANDS.put("fiat", new String[]{"Fi", "#9B1B30", "fiat.com"});
-        BRANDS.put("maserati", new String[]{"Ms", "#0C2340", "maserati.com"});
-        BRANDS.put("bentley", new String[]{"B", "#333333", "bentley.com"});
-        BRANDS.put("peugeot", new String[]{"P", "#003B7C", "peugeot.com"});
-        BRANDS.put("renault", new String[]{"R", "#FFCC00", "renault.com"});
-        BRANDS.put("citroen", new String[]{"C", "#AC1E2D", "citroen.com"});
-        BRANDS.put("dacia", new String[]{"D", "#003B7C", "dacia.com"});
-        BRANDS.put("seat", new String[]{"S", "#B4000E", "seat.com"});
-        BRANDS.put("skoda", new String[]{"Sk", "#4BA82E", "skoda.com"});
-        BRANDS.put("mini", new String[]{"Mi", "#000000", "mini.com"});
-        BRANDS.put("infiniti", new String[]{"I", "#1C1C1C", "infiniti.com"});
-        BRANDS.put("acura", new String[]{"Ac", "#1C1C1C", "acura.com"});
-        BRANDS.put("genesis", new String[]{"G", "#8B634B", "genesis.com"});
-        BRANDS.put("cadillac", new String[]{"C", "#9E7B5C", "cadillac.com"});
-        BRANDS.put("gmc", new String[]{"G", "#CC0000", "gmc.com"});
-        BRANDS.put("lincoln", new String[]{"L", "#0C2340", "lincoln.com"});
-        BRANDS.put("mitsubishi", new String[]{"Mi", "#E60012", "mitsubishi.com"});
-        BRANDS.put("suzuki", new String[]{"Su", "#E4002B", "suzuki.com"});
-        BRANDS.put("land rover", new String[]{"LR", "#005A2B", "landrover.com"});
-        BRANDS.put("range rover", new String[]{"RR", "#005A2B", "landrover.com"});
+        // Format: brand keyword -> [logo filename, abbreviation, hex color]
+        BRANDS.put("toyota", new String[]{"toyota.png", "T", "#EB0A1E"});
+        BRANDS.put("honda", new String[]{"honda.png", "H", "#CC0000"});
+        BRANDS.put("ford", new String[]{"ford.png", "F", "#003478"});
+        BRANDS.put("chevrolet", new String[]{"chevrolet.png", "C", "#D4AA00"});
+        BRANDS.put("chevy", new String[]{"chevrolet.png", "C", "#D4AA00"});
+        BRANDS.put("bmw", new String[]{"bmw.png", "B", "#0066B1"});
+        BRANDS.put("mercedes", new String[]{"mercedes-benz.png", "M", "#00ADEF"});
+        BRANDS.put("benz", new String[]{"mercedes-benz.png", "M", "#00ADEF"});
+        BRANDS.put("audi", new String[]{"audi.png", "A", "#BB0A30"});
+        BRANDS.put("volkswagen", new String[]{"volkswagen.png", "VW", "#001E50"});
+        BRANDS.put("vw", new String[]{"volkswagen.png", "VW", "#001E50"});
+        BRANDS.put("nissan", new String[]{"nissan.png", "N", "#C3002F"});
+        BRANDS.put("hyundai", new String[]{"hyundai.png", "H", "#002C5F"});
+        BRANDS.put("kia", new String[]{"kia.png", "K", "#05141F"});
+        BRANDS.put("mazda", new String[]{"mazda.png", "M", "#101010"});
+        BRANDS.put("subaru", new String[]{"subaru.png", "S", "#013C91"});
+        BRANDS.put("lexus", new String[]{"lexus.png", "L", "#1A1A1A"});
+        BRANDS.put("porsche", new String[]{"porsche.png", "P", "#B12B28"});
+        BRANDS.put("ferrari", new String[]{"ferrari.png", "F", "#FF2800"});
+        BRANDS.put("lamborghini", new String[]{"lamborghini.png", "L", "#DDB321"});
+        BRANDS.put("tesla", new String[]{"tesla.png", "T", "#CC0000"});
+        BRANDS.put("volvo", new String[]{"volvo.png", "V", "#003057"});
+        BRANDS.put("jaguar", new String[]{"jaguar.png", "J", "#1A472A"});
+        BRANDS.put("jeep", new String[]{"jeep.png", "J", "#3A5A40"});
+        BRANDS.put("dodge", new String[]{"dodge.png", "D", "#BA0C2F"});
+        BRANDS.put("ram", new String[]{"ram.png", "R", "#000000"});
+        BRANDS.put("fiat", new String[]{"fiat.png", "F", "#9B1B30"});
+        BRANDS.put("maserati", new String[]{"maserati.png", "M", "#0C2340"});
+        BRANDS.put("bentley", new String[]{"bentley.png", "B", "#333333"});
+        BRANDS.put("peugeot", new String[]{"peugeot.png", "P", "#003B7C"});
+        BRANDS.put("renault", new String[]{"renault.png", "R", "#FFCC00"});
+        BRANDS.put("citroen", new String[]{"citroen.png", "C", "#AC1E2D"});
+        BRANDS.put("dacia", new String[]{"dacia.png", "D", "#003B7C"});
+        BRANDS.put("seat", new String[]{"seat.png", "S", "#B4000E"});
+        BRANDS.put("skoda", new String[]{"skoda.png", "S", "#4BA82E"});
+        BRANDS.put("mini", new String[]{"mini.png", "M", "#000000"});
+        BRANDS.put("infiniti", new String[]{"infiniti.png", "I", "#1C1C1C"});
+        BRANDS.put("acura", new String[]{"acura.png", "A", "#1C1C1C"});
+        BRANDS.put("genesis", new String[]{"genesis.png", "G", "#8B634B"});
+        BRANDS.put("cadillac", new String[]{"cadillac.png", "C", "#9E7B5C"});
+        BRANDS.put("gmc", new String[]{"gmc.png", "G", "#CC0000"});
+        BRANDS.put("lincoln", new String[]{"lincoln.png", "L", "#0C2340"});
+        BRANDS.put("mitsubishi", new String[]{"mitsubishi.png", "M", "#E60012"});
+        BRANDS.put("suzuki", new String[]{"suzuki.png", "S", "#E4002B"});
+        BRANDS.put("land rover", new String[]{"land-rover.png", "LR", "#005A2B"});
+        BRANDS.put("range rover", new String[]{"land-rover.png", "RR", "#005A2B"});
+        BRANDS.put("alfa romeo", new String[]{"alfa-romeo.png", "AR", "#8B0000"});
+        BRANDS.put("aston martin", new String[]{"aston-martin.png", "AM", "#006400"});
+        BRANDS.put("bugatti", new String[]{"bugatti.png", "Bu", "#BE0030"});
+        BRANDS.put("mclaren", new String[]{"mclaren.png", "Mc", "#FF6600"});
+        BRANDS.put("rolls royce", new String[]{"rolls-royce.png", "RR", "#1C1C1C"});
     }
     
     /**
-     * Get brand info for a vehicle name
+     * Create a brand badge for a vehicle name.
+     * Tries to load logo from CDN, falls back to text badge.
      */
-    private static String[] getBrandInfo(String vehicleName) {
+    public static Node createBrandBadge(String vehicleName) {
         if (vehicleName == null || vehicleName.isEmpty()) return null;
         
         String lowerName = vehicleName.toLowerCase();
+        String[] brandInfo = null;
+        
         for (Map.Entry<String, String[]> entry : BRANDS.entrySet()) {
             if (lowerName.contains(entry.getKey())) {
-                return entry.getValue();
+                brandInfo = entry.getValue();
+                break;
             }
         }
-        return null;
-    }
-    
-    /**
-     * Create a brand badge - tries logo first, falls back to text badge
-     */
-    public static Node createBrandBadge(String vehicleName) {
-        String[] brandInfo = getBrandInfo(vehicleName);
+        
         if (brandInfo == null) return null;
         
-        String logoUrl = "https://logo.clearbit.com/" + brandInfo[2];
+        String logoFilename = brandInfo[0];
+        String logoUrl = LOGO_CDN + logoFilename;
         
-        // Check if this URL already failed
-        if (failedUrls.containsKey(logoUrl)) {
-            return createTextBadge(brandInfo);
+        // Check if this logo already failed
+        if (failedLogos.containsKey(logoUrl)) {
+            return createTextBadge(brandInfo[1], brandInfo[2]);
         }
         
         // Check cache
         if (logoCache.containsKey(logoUrl)) {
             Image cached = logoCache.get(logoUrl);
             if (cached != null && !cached.isError()) {
-                return createLogoView(cached);
-            } else {
-                return createTextBadge(brandInfo);
+                return createLogoBadge(cached);
             }
         }
         
-        // Try to load from network
+        // Try to load logo from CDN
         try {
-            Image logo = new Image(logoUrl, 20, 20, true, true, false);
-            
-            if (logo.isError()) {
-                failedUrls.put(logoUrl, true);
-                return createTextBadge(brandInfo);
+            Image logo = new Image(logoUrl, 24, 24, true, true, false);
+            if (!logo.isError()) {
+                logoCache.put(logoUrl, logo);
+                return createLogoBadge(logo);
             }
-            
-            logoCache.put(logoUrl, logo);
-            return createLogoView(logo);
         } catch (Exception e) {
-            failedUrls.put(logoUrl, true);
-            return createTextBadge(brandInfo);
+            // Ignore
         }
+        
+        // Mark as failed and use text badge
+        failedLogos.put(logoUrl, true);
+        return createTextBadge(brandInfo[1], brandInfo[2]);
     }
     
-    /**
-     * Create an ImageView for a logo
-     */
-    private static ImageView createLogoView(Image logo) {
+    private static Node createLogoBadge(Image logo) {
         ImageView logoView = new ImageView(logo);
-        logoView.setFitWidth(18);
-        logoView.setFitHeight(18);
+        logoView.setFitWidth(20);
+        logoView.setFitHeight(20);
         logoView.setPreserveRatio(true);
         logoView.setSmooth(true);
         return logoView;
     }
     
-    /**
-     * Create a text-based badge (colored circle with abbreviation)
-     */
-    private static StackPane createTextBadge(String[] brandInfo) {
+    private static Node createTextBadge(String abbrev, String colorHex) {
         Circle circle = new Circle(10);
         try {
-            circle.setFill(Color.web(brandInfo[1]));
+            circle.setFill(Color.web(colorHex));
         } catch (Exception e) {
             circle.setFill(Color.web("#6366f1"));
         }
         
-        Label abbrev = new Label(brandInfo[0]);
-        abbrev.setStyle("-fx-font-size: 9px; -fx-font-weight: bold; -fx-text-fill: white;");
+        Label label = new Label(abbrev);
+        label.setStyle("-fx-font-size: 9px; -fx-font-weight: bold; -fx-text-fill: white;");
         
-        StackPane badge = new StackPane(circle, abbrev);
+        StackPane badge = new StackPane(circle, label);
         badge.setMinSize(20, 20);
         badge.setMaxSize(20, 20);
         
@@ -165,24 +162,14 @@ public class CarBrandDetector {
     }
     
     /**
-     * Check if a vehicle name contains a known brand
+     * Check if vehicle has a known brand
      */
     public static boolean hasBrand(String vehicleName) {
-        return getBrandInfo(vehicleName) != null;
-    }
-    
-    /**
-     * Detect brand name from vehicle name
-     */
-    public static String detectBrand(String vehicleName) {
-        if (vehicleName == null || vehicleName.isEmpty()) return null;
-        
+        if (vehicleName == null) return false;
         String lowerName = vehicleName.toLowerCase();
         for (String brand : BRANDS.keySet()) {
-            if (lowerName.contains(brand)) {
-                return brand.substring(0, 1).toUpperCase() + brand.substring(1);
-            }
+            if (lowerName.contains(brand)) return true;
         }
-        return null;
+        return false;
     }
 }

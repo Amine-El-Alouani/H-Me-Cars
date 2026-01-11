@@ -141,33 +141,35 @@ public class DashboardController {
         // Image container
         StackPane imageContainer = new StackPane();
         imageContainer.getStyleClass().add("vehicle-card-image-container");
-        imageContainer.setMinSize(200, 110);
-        imageContainer.setMaxSize(200, 110);
+        imageContainer.setMinSize(260, 150);
+        imageContainer.setMaxSize(260, 150);
+        imageContainer.setPrefSize(260, 150);
         
-        // Try to get vehicle-specific image first, then fall back to category
+        // Clip for rounded corners
+        javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(260, 150);
+        clip.setArcWidth(30);
+        clip.setArcHeight(30);
+        imageContainer.setClip(clip);
+        
+        // Try to get vehicle image
         Image carImage = getImageForVehicle(vehicle);
-        if (carImage != null) {
+        if (carImage != null && !carImage.isError()) {
             ImageView imageView = new ImageView(carImage);
-            imageView.setFitWidth(200);
-            imageView.setFitHeight(110);
-            imageView.setPreserveRatio(false); // Fill completely, stretch to fit
+            // Simple approach: fill width, let height adjust, center vertically
+            imageView.setFitWidth(260);
+            imageView.setPreserveRatio(true);
             imageView.setSmooth(true);
-            
-            // Clip to rounded corners at top
-            javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(200, 110);
-            clip.setArcWidth(32);
-            clip.setArcHeight(32);
-            imageView.setClip(clip);
-            
             imageContainer.getChildren().add(imageView);
+            StackPane.setAlignment(imageView, Pos.CENTER);
         } else {
+            // Placeholder
             Label placeholderIcon = new Label("\uD83D\uDE97");
-            placeholderIcon.setStyle("-fx-font-size: 36px;");
+            placeholderIcon.setStyle("-fx-font-size: 48px; -fx-text-fill: #64748b;");
             imageContainer.getChildren().add(placeholderIcon);
         }
         
         // Content container
-        VBox content = new VBox(6);
+        VBox content = new VBox(8);
         content.getStyleClass().add("vehicle-card-content");
         
         // Vehicle name with brand badge
@@ -220,29 +222,31 @@ public class DashboardController {
     }
     
     private Image getImageForVehicle(Vehicle vehicle) {
-        // First, check for image data from database (shared across all users)
+        // Check for image data from database
         if (vehicle.getImageData() != null && vehicle.getImageData().length > 0) {
             try {
                 java.io.ByteArrayInputStream bis = new java.io.ByteArrayInputStream(vehicle.getImageData());
-                return new Image(bis, 200, 110, false, true);
+                // Load without size constraints to get full resolution
+                Image img = new Image(bis);
+                System.out.println("Loaded DB image: " + img.getWidth() + "x" + img.getHeight());
+                return img;
             } catch (Exception e) {
                 System.out.println("Could not load database image: " + e.getMessage());
             }
         }
         
-        // Then try local file path (for backwards compatibility)
+        // Try local file path
         if (vehicle.getImagePath() != null && !vehicle.getImagePath().isEmpty()) {
             try {
                 java.io.File imageFile = new java.io.File(vehicle.getImagePath());
                 if (imageFile.exists()) {
-                    return new Image(imageFile.toURI().toString(), 200, 110, false, true);
+                    return new Image(imageFile.toURI().toString());
                 }
             } catch (Exception e) {
                 System.out.println("Could not load local image: " + vehicle.getImagePath());
             }
         }
         
-        // No image available - return null (placeholder will be shown)
         return null;
     }
     
