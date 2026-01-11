@@ -71,7 +71,14 @@
 
 /* ==================== AUTH SCREENS CONTAINER ==================== */
 .auth-container {
-    -fx-background-color: #0a0e1a;
+    -fx-background-image: url("images/dealership_bg.png");
+    -fx-background-size: cover;
+    -fx-background-position: center 30%;
+    -fx-background-repeat: no-repeat;
+}
+
+.auth-overlay {
+    -fx-background-color: rgba(10, 14, 26, 0.75);
 }
 
 .auth-bg-orb {
@@ -93,13 +100,13 @@
 
 /* ==================== GLASS CARD ==================== */
 .glass-card {
-    -fx-background-color: rgba(30, 41, 59, 0.75);
-    -fx-background-radius: 24;
+    -fx-background-color: rgba(30, 41, 59, 0.8);
+    -fx-background-radius: 20;
     -fx-border-color: rgba(255, 255, 255, 0.1);
-    -fx-border-radius: 24;
+    -fx-border-radius: 20;
     -fx-border-width: 1;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 40, 0, 0, 10);
-    -fx-padding: 48;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 30, 0, 0, 8);
+    -fx-padding: 32;
 }
 
 .glass-card-small {
@@ -1243,4 +1250,102 @@
 /* Hide focus ring globally for cleaner look */
 .focus-indicator {
     -fx-border-color: transparent;
+}
+
+/* ==================== VEHICLE CARDS ==================== */
+.vehicle-cards-container {
+    -fx-background-color: transparent;
+    -fx-padding: 8;
+    -fx-hgap: 20;
+    -fx-vgap: 20;
+}
+
+.vehicle-card {
+    -fx-background-color: rgba(30, 41, 59, 0.85);
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 16;
+    -fx-border-width: 1;
+    -fx-pref-width: 200;
+    -fx-min-width: 200;
+    -fx-max-width: 200;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 10, 0, 0, 4);
+}
+
+.vehicle-card:hover {
+    -fx-background-color: rgba(40, 53, 72, 0.9);
+    -fx-border-color: rgba(99, 102, 241, 0.4);
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.25), 25, 0, 0, 8);
+    -fx-translate-y: -4;
+}
+
+.vehicle-card-selected {
+    -fx-background-color: rgba(99, 102, 241, 0.25);
+    -fx-border-color: #6366f1;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.4), 30, 0, 0, 8);
+}
+
+.vehicle-card-image-container {
+    -fx-background-color: #1e293b;
+    -fx-background-radius: 16 16 0 0;
+    -fx-min-height: 110;
+    -fx-pref-height: 110;
+    -fx-alignment: center;
+    -fx-padding: 0;
+}
+
+.vehicle-card-content {
+    -fx-padding: 10;
+    -fx-spacing: 6;
+}
+
+.vehicle-card-name {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f8fafc;
+}
+
+.vehicle-card-category {
+    -fx-background-color: rgba(99, 102, 241, 0.2);
+    -fx-background-radius: 8;
+    -fx-padding: 4 10;
+    -fx-text-fill: #a5b4fc;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.vehicle-card-price {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #10b981;
+}
+
+.vehicle-card-price-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: #64748b;
+}
+
+.vehicle-card-status-available {
+    -fx-text-fill: #10b981;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+.vehicle-card-status-unavailable {
+    -fx-text-fill: #f59e0b;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+/* Loading Spinner */
+.loading-container {
+    -fx-alignment: center;
+    -fx-spacing: 16;
+}
+
+.loading-text {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 14px;
 }

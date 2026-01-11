@@ -103,7 +103,7 @@
                 </HBox>
             </HBox>
             
-            <!-- Content Body - Vehicle Table -->
+            <!-- Content Body - Vehicle Cards -->
             <VBox styleClass="content-body" VBox.vgrow="ALWAYS">
                 <VBox styleClass="card" VBox.vgrow="ALWAYS">
                     
@@ -111,7 +111,7 @@
                     <HBox styleClass="card-header" alignment="CENTER_LEFT">
                         <VBox spacing="4">
                             <Label text="Car Fleet" styleClass="card-title"/>
-                            <Label text="Select a vehicle to rent" styleClass="card-subtitle"/>
+                            <Label text="Click on a vehicle card to select it for rental" styleClass="card-subtitle"/>
                         </VBox>
                         <Region HBox.hgrow="ALWAYS"/>
                         <Button text="↻ Refresh" 
@@ -120,18 +120,14 @@
                                 style="-fx-padding: 8 16; -fx-font-size: 13px;"/>
                     </HBox>
                     
-                    <!-- Table -->
-                    <TableView fx:id="vehicleTable" VBox.vgrow="ALWAYS" styleClass="table-view">
+                    <!-- Vehicle Cards Container -->
+                    <ScrollPane fx:id="vehicleScrollPane" fitToWidth="true" VBox.vgrow="ALWAYS" 
+                                style="-fx-background-color: transparent; -fx-background: transparent;">
                         <VBox.margin>
                             <Insets top="16"/>
                         </VBox.margin>
-                        <columns>
-                            <TableColumn fx:id="colName" text="Model" prefWidth="280"/>
-                            <TableColumn fx:id="colCategory" text="Category" prefWidth="180"/>
-                            <TableColumn fx:id="colPrice" text="Daily Price (MAD)" prefWidth="160"/>
-                            <TableColumn fx:id="colStatus" text="Status" prefWidth="200"/>
-                        </columns>
-                    </TableView>
+                        <FlowPane fx:id="vehicleCardsPane" styleClass="vehicle-cards-container"/>
+                    </ScrollPane>
                     
                 </VBox>
             </VBox>

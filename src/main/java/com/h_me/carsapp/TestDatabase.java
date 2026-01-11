@@ -53,7 +53,5 @@ public class TestDatabase {
         v.setPriceRental(300);
         v.setDealershipID(1);
         v.setManufactureID(1);
-
-        dao.addVehicle(v);
     }
 }

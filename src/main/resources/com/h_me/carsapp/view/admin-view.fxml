@@ -43,23 +43,23 @@
             <Tab text="🚗  Manage Cars" closable="false">
                 <VBox styleClass="content-body" spacing="20">
                     
-                    <!-- Stats Row (Optional Visual Enhancement) -->
-                    <HBox spacing="20">
-                        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
-                            <Label text="Total Cars" styleClass="stat-label"/>
-                            <Label text="—" styleClass="stat-value"/>
+                    <!-- Stats Row -->
+                    <HBox spacing="12">
+                        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" style="-fx-padding: 12;">
+                            <Label text="Total Cars" styleClass="stat-label" style="-fx-font-size: 11px;"/>
+                            <Label fx:id="totalCarsLabel" text="0" styleClass="stat-value" style="-fx-font-size: 22px;"/>
                         </VBox>
-                        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
-                            <Label text="Available" styleClass="stat-label"/>
-                            <Label text="—" styleClass="stat-value" style="-fx-text-fill: #10b981;"/>
+                        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" style="-fx-padding: 12;">
+                            <Label text="Available" styleClass="stat-label" style="-fx-font-size: 11px;"/>
+                            <Label fx:id="availableCarsLabel" text="0" styleClass="stat-value" style="-fx-font-size: 22px; -fx-text-fill: #10b981;"/>
                         </VBox>
-                        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
-                            <Label text="In Maintenance" styleClass="stat-label"/>
-                            <Label text="—" styleClass="stat-value" style="-fx-text-fill: #f59e0b;"/>
+                        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" style="-fx-padding: 12;">
+                            <Label text="Maintenance" styleClass="stat-label" style="-fx-font-size: 11px;"/>
+                            <Label fx:id="maintenanceCarsLabel" text="0" styleClass="stat-value" style="-fx-font-size: 22px; -fx-text-fill: #f59e0b;"/>
                         </VBox>
-                        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
-                            <Label text="Rented" styleClass="stat-label"/>
-                            <Label text="—" styleClass="stat-value" style="-fx-text-fill: #6366f1;"/>
+                        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" style="-fx-padding: 12;">
+                            <Label text="Rented" styleClass="stat-label" style="-fx-font-size: 11px;"/>
+                            <Label fx:id="rentedCarsLabel" text="0" styleClass="stat-value" style="-fx-font-size: 22px; -fx-text-fill: #6366f1;"/>
                         </VBox>
                     </HBox>
                     
@@ -114,9 +114,25 @@
                             <Label text="Price (MAD/day)" styleClass="label-muted" style="-fx-font-size: 11px;"/>
                             <TextField fx:id="priceField" 
                                        promptText="e.g., 350" 
-                                       prefWidth="130"
+                                       prefWidth="100"
                                        styleClass="text-field"
                                        style="-fx-pref-height: 42;"/>
+                        </VBox>
+                        
+                        <!-- Image Selection -->
+                        <VBox spacing="4">
+                            <Label text="Car Image" styleClass="label-muted" style="-fx-font-size: 11px;"/>
+                            <HBox spacing="8" alignment="CENTER_LEFT">
+                                <Button text="📷 Browse" 
+                                        onAction="#handleBrowseImage"
+                                        styleClass="button"
+                                        style="-fx-padding: 10 16;"/>
+                                <Label fx:id="imagePathLabel" 
+                                       text="No image selected" 
+                                       styleClass="label-muted"
+                                       style="-fx-font-size: 11px;"
+                                       maxWidth="120"/>
+                            </HBox>
                         </VBox>
 
                         <Region HBox.hgrow="ALWAYS"/>

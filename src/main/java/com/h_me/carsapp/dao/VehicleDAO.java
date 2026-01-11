@@ -77,27 +77,53 @@ public class VehicleDAO {
         return list;
     }
 
-    public void addVehicle(Vehicle v) {
-        String sql = "INSERT INTO vehicles (model, category, pricepurchase, pricerental, status, dealershipid, manufacturerid) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    public void addVehicle(Vehicle v) throws SQLException {
+        // First, get the next available vehicleid
+        String maxIdSql = "SELECT COALESCE(MAX(vehicleid), 0) + 1 FROM vehicles";
+        int newVehicleId;
+        
+        try (Connection conn = PostgresConnection.getConnection();
+             PreparedStatement maxStmt = conn.prepareStatement(maxIdSql);
+             ResultSet rs = maxStmt.executeQuery()) {
+            rs.next();
+            newVehicleId = rs.getInt(1);
+        }
+        
+        String sql = "INSERT INTO vehicles (vehicleid, model, category, pricepurchase, pricerental, status, dealershipid, manufacturerid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = PostgresConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, v.getName()); // Java 'Name' goes into DB 'model'
-            stmt.setString(2, v.getCategory());
-            stmt.setDouble(3, v.getPricePurchase());
-            stmt.setDouble(4, v.getPriceRental());
-            stmt.setString(5, "AVAILABLE");
-            stmt.setInt(6, v.getDealershipID());
-            stmt.setInt(7, v.getManufactureID());
+            stmt.setInt(1, newVehicleId);
+            stmt.setString(2, v.getName());
+            stmt.setString(3, v.getCategory());
+            stmt.setDouble(4, v.getPricePurchase());
+            stmt.setDouble(5, v.getPriceRental());
+            stmt.setString(6, "AVAILABLE");
+            
+            // Set dealership/manufacturer to NULL if they're 0
+            if (v.getDealershipID() > 0) {
+                stmt.setInt(7, v.getDealershipID());
+            } else {
+                stmt.setNull(7, java.sql.Types.INTEGER);
+            }
+            
+            if (v.getManufactureID() > 0) {
+                stmt.setInt(8, v.getManufactureID());
+            } else {
+                stmt.setNull(8, java.sql.Types.INTEGER);
+            }
 
-            stmt.executeUpdate();
-            System.out.println("Vehicle added to database.");
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Vehicle added to database with ID: " + newVehicleId);
+            } else {
+                throw new SQLException("No rows inserted - INSERT failed silently");
+            }
         }
     }
+
+
 
     public void updateVehicleStatus(int vehicleId, String newStatus) {
         String sql = "UPDATE vehicles SET status = ? WHERE vehicleid = ?";
@@ -124,6 +150,15 @@ public class VehicleDAO {
             System.out.println("Vehicle deleted.");
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+    
+    public void deleteAllVehicles() throws SQLException {
+        String sql = "DELETE FROM vehicles";
+        try (Connection conn = PostgresConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            int deleted = stmt.executeUpdate();
+            System.out.println("Deleted " + deleted + " vehicles.");
         }
     }
 }
