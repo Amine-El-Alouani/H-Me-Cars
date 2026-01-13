@@ -1340,6 +1340,25 @@
     -fx-font-weight: 600;
 }
 
+.vehicle-card-status-maintenance {
+    -fx-text-fill: #f97316;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-background-color: rgba(249, 115, 22, 0.15);
+    -fx-background-radius: 6;
+    -fx-padding: 4 8;
+}
+
+/* Maintenance overlay badge on image */
+.maintenance-overlay {
+    -fx-background-color: rgba(249, 115, 22, 0.9);
+    -fx-background-radius: 8;
+    -fx-padding: 6 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
 /* Loading Spinner */
 .loading-container {
     -fx-alignment: center;

@@ -218,7 +218,10 @@ public class DashboardController {
         
         // Status
         Label statusLabel = new Label();
-        if (vehicle.getAvailableFrom() != null && vehicle.getAvailableFrom().isAfter(LocalDateTime.now())) {
+        if ("MAINTENANCE".equalsIgnoreCase(vehicle.getStatus())) {
+            statusLabel.setText("🔧 En maintenance");
+            statusLabel.getStyleClass().add("vehicle-card-status-maintenance");
+        } else if (vehicle.getAvailableFrom() != null && vehicle.getAvailableFrom().isAfter(LocalDateTime.now())) {
             statusLabel.setText("Available from " + vehicle.getAvailableFrom().toLocalDate());
             statusLabel.getStyleClass().add("vehicle-card-status-unavailable");
         } else if ("AVAILABLE".equalsIgnoreCase(vehicle.getStatus())) {
