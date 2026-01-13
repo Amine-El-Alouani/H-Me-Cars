@@ -7,6 +7,8 @@ module com.example.hmecars {
 
     requires java.sql;
     requires org.postgresql.jdbc;
+    requires com.zaxxer.hikari;
+    requires org.slf4j;
     
     opens com.h_me.carsapp to javafx.fxml;
     opens com.h_me.carsapp.controller to javafx.fxml;

@@ -32,6 +32,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class DashboardController {
 
@@ -50,6 +52,12 @@ public class DashboardController {
     
     // Cache for car images by category
     private Map<String, Image> categoryImages = new HashMap<>();
+    
+    // Thread pool for lazy image loading (limited to avoid overwhelming the DB)
+    private static final ExecutorService imageLoaderPool = Executors.newFixedThreadPool(3);
+    
+    // Cache for loaded vehicle images (shared across all cards)
+    private static final Map<Integer, Image> vehicleImageCache = new HashMap<>();
 
     @FXML
     public void initialize() {
@@ -151,21 +159,30 @@ public class DashboardController {
         clip.setArcHeight(30);
         imageContainer.setClip(clip);
         
-        // Try to get vehicle image
-        Image carImage = getImageForVehicle(vehicle);
-        if (carImage != null && !carImage.isError()) {
-            ImageView imageView = new ImageView(carImage);
-            // Simple approach: fill width, let height adjust, center vertically
-            imageView.setFitWidth(260);
-            imageView.setPreserveRatio(true);
-            imageView.setSmooth(true);
+        // Create placeholder first
+        Label placeholderIcon = new Label("\uD83D\uDE97");
+        placeholderIcon.setStyle("-fx-font-size: 48px; -fx-text-fill: #64748b;");
+        
+        // Check if we already have the image cached
+        if (vehicleImageCache.containsKey(vehicle.getVehicleID())) {
+            Image cachedImage = vehicleImageCache.get(vehicle.getVehicleID());
+            ImageView imageView = createImageView(cachedImage);
             imageContainer.getChildren().add(imageView);
-            StackPane.setAlignment(imageView, Pos.CENTER);
+        } else if (vehicle.getImageData() != null && vehicle.getImageData().length > 0) {
+            // Image data already loaded (from DAO cache)
+            try {
+                Image img = new Image(new java.io.ByteArrayInputStream(vehicle.getImageData()));
+                vehicleImageCache.put(vehicle.getVehicleID(), img);
+                ImageView imageView = createImageView(img);
+                imageContainer.getChildren().add(imageView);
+            } catch (Exception e) {
+                imageContainer.getChildren().add(placeholderIcon);
+                lazyLoadImage(vehicle.getVehicleID(), imageContainer, placeholderIcon);
+            }
         } else {
-            // Placeholder
-            Label placeholderIcon = new Label("\uD83D\uDE97");
-            placeholderIcon.setStyle("-fx-font-size: 48px; -fx-text-fill: #64748b;");
+            // Show placeholder and lazy load the image
             imageContainer.getChildren().add(placeholderIcon);
+            lazyLoadImage(vehicle.getVehicleID(), imageContainer, placeholderIcon);
         }
         
         // Content container
@@ -219,6 +236,44 @@ public class DashboardController {
         card.setOnMouseClicked(e -> selectVehicle(vehicle, card));
         
         return card;
+    }
+    
+    /**
+     * Create a properly configured ImageView for a car image
+     */
+    private ImageView createImageView(Image image) {
+        ImageView imageView = new ImageView(image);
+        imageView.setFitWidth(260);
+        imageView.setPreserveRatio(true);
+        imageView.setSmooth(true);
+        StackPane.setAlignment(imageView, Pos.CENTER);
+        return imageView;
+    }
+    
+    /**
+     * Lazy load image from database in background thread
+     */
+    private void lazyLoadImage(int vehicleId, StackPane imageContainer, Label placeholder) {
+        imageLoaderPool.submit(() -> {
+            try {
+                byte[] imageData = vehicleDAO.getVehicleImage(vehicleId);
+                if (imageData != null && imageData.length > 0) {
+                    Image img = new Image(new java.io.ByteArrayInputStream(imageData));
+                    vehicleImageCache.put(vehicleId, img);
+                    
+                    Platform.runLater(() -> {
+                        imageContainer.getChildren().clear();
+                        ImageView imageView = createImageView(img);
+                        imageContainer.getChildren().add(imageView);
+                        // Fade in the new image
+                        new FadeIn(imageView).setSpeed(2.0).play();
+                    });
+                }
+                // If no image data, keep the placeholder
+            } catch (Exception e) {
+                System.err.println("Failed to lazy load image for vehicle " + vehicleId + ": " + e.getMessage());
+            }
+        });
     }
     
     private Image getImageForVehicle(Vehicle vehicle) {

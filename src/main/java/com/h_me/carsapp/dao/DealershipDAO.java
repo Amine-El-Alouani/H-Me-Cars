@@ -27,6 +27,7 @@ public class DealershipDAO {
                 list.add(d);
             }
         } catch (SQLException e) {
+            System.err.println("Error fetching dealerships: " + e.getMessage());
             e.printStackTrace();
         }
         return list;
@@ -34,7 +35,6 @@ public class DealershipDAO {
 
     public List<Dealerships> findNearby(double userLat, double userLon, double radiusKm) {
         List<Dealerships> list = new ArrayList<>();
-
 
         String sql = "SELECT *, (6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance " +
                 "FROM dealerships " +
@@ -65,10 +65,12 @@ public class DealershipDAO {
                 list.add(d);
             }
         } catch (SQLException e) {
+            System.err.println("Error finding nearby dealerships: " + e.getMessage());
             e.printStackTrace();
         }
         return list;
     }
+
     public List<Dealerships> searchDealerships(String city, String name) {
         List<Dealerships> list = new ArrayList<>();
 
@@ -92,6 +94,7 @@ public class DealershipDAO {
                 list.add(d);
             }
         } catch (SQLException e) {
+            System.err.println("Error searching dealerships: " + e.getMessage());
             e.printStackTrace();
         }
         return list;

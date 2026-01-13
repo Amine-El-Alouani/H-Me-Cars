@@ -25,6 +25,7 @@ public class ReservationDAO {
                 return rs.getInt(1) == 0;
             }
         } catch (SQLException e) {
+            System.err.println("Error checking car availability: " + e.getMessage());
             e.printStackTrace();
         }
         return false;

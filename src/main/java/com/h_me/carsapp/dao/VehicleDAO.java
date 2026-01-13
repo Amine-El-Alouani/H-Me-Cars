@@ -7,13 +7,22 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class VehicleDAO {
+    
+    // Cache for loaded images to avoid redundant database calls
+    private static final Map<Integer, byte[]> imageCache = new ConcurrentHashMap<>();
 
+    /**
+     * Get all available vehicles WITHOUT loading images (for fast initial load).
+     * Images should be loaded lazily via getVehicleImage().
+     */
     public List<Vehicle> getAllAvailableVehicles() {
         List<Vehicle> list = new ArrayList<>();
-        // Fetch all vehicles with image data
-        String sql = "SELECT v.*, " +
+        // Note: We exclude the 'image' column for faster loading
+        String sql = "SELECT v.vehicleid, v.model, v.category, v.pricepurchase, v.pricerental, v.status, v.dealershipid, v.manufacturerid, " +
                      "(SELECT MAX(r.enddate) FROM reservations r WHERE r.vehicleid = v.vehicleid AND r.enddate >= ?) as reserved_until " +
                      "FROM vehicles v";
 
@@ -34,13 +43,11 @@ public class VehicleDAO {
                 v.setDealershipID(rs.getInt("dealershipid"));
                 v.setManufactureID(rs.getInt("manufacturerid"));
                 
-                // Load image data if column exists
-                try {
-                    byte[] imageData = rs.getBytes("image");
-                    v.setImageData(imageData);
-                } catch (SQLException e) {
-                    // Column doesn't exist yet, ignore
+                // Check if we have a cached image
+                if (imageCache.containsKey(v.getVehicleID())) {
+                    v.setImageData(imageCache.get(v.getVehicleID()));
                 }
+                // Note: We don't load image data here anymore for faster initial load
                 
                 Timestamp reservedUntil = rs.getTimestamp("reserved_until");
                 if (reservedUntil != null) {
@@ -50,14 +57,66 @@ public class VehicleDAO {
                 list.add(v);
             }
         } catch (SQLException e) {
+            System.err.println("Error fetching vehicles: " + e.getMessage());
             e.printStackTrace();
         }
         return list;
     }
+    
+    /**
+     * Load image for a specific vehicle (for lazy loading).
+     * Results are cached to avoid redundant database calls.
+     * 
+     * @param vehicleId The vehicle ID to load image for
+     * @return The image bytes, or null if no image exists
+     */
+    public byte[] getVehicleImage(int vehicleId) {
+        // Check cache first
+        if (imageCache.containsKey(vehicleId)) {
+            return imageCache.get(vehicleId);
+        }
+        
+        String sql = "SELECT image FROM vehicles WHERE vehicleid = ?";
+        
+        try (Connection conn = PostgresConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, vehicleId);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                byte[] imageData = rs.getBytes("image");
+                if (imageData != null && imageData.length > 0) {
+                    // Cache the result
+                    imageCache.put(vehicleId, imageData);
+                    return imageData;
+                }
+            }
+        } catch (SQLException e) {
+            // Image column might not exist or other error
+            System.err.println("Could not load image for vehicle " + vehicleId + ": " + e.getMessage());
+        }
+        return null;
+    }
+    
+    /**
+     * Clear the image cache (useful when images are updated)
+     */
+    public void clearImageCache() {
+        imageCache.clear();
+    }
+    
+    /**
+     * Clear a specific vehicle's cached image
+     */
+    public void clearImageCache(int vehicleId) {
+        imageCache.remove(vehicleId);
+    }
 
     public List<Vehicle> getVehiclesByDealership(int dealershipId) {
         List<Vehicle> list = new ArrayList<>();
-        String sql = "SELECT * FROM vehicles WHERE dealershipid = ? AND status = 'AVAILABLE'";
+        String sql = "SELECT vehicleid, model, category, pricepurchase, pricerental, status, dealershipid, manufacturerid " +
+                     "FROM vehicles WHERE dealershipid = ? AND status = 'AVAILABLE'";
 
         try (Connection conn = PostgresConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -76,16 +135,15 @@ public class VehicleDAO {
                 v.setDealershipID(rs.getInt("dealershipid"));
                 v.setManufactureID(rs.getInt("manufacturerid"));
                 
-                try {
-                    byte[] imageData = rs.getBytes("image");
-                    v.setImageData(imageData);
-                } catch (SQLException e) {
-                    // Column doesn't exist yet
+                // Check cache for image
+                if (imageCache.containsKey(v.getVehicleID())) {
+                    v.setImageData(imageCache.get(v.getVehicleID()));
                 }
                 
                 list.add(v);
             }
         } catch (SQLException e) {
+            System.err.println("Error fetching vehicles by dealership: " + e.getMessage());
             e.printStackTrace();
         }
         return list;
@@ -146,6 +204,8 @@ public class VehicleDAO {
             if (hasImageColumn && hasImage) {
                 stmt.setBytes(9, v.getImageData());
                 System.out.println("DEBUG: Setting image bytes in prepared statement");
+                // Cache the new image
+                imageCache.put(newVehicleId, v.getImageData());
             }
 
             int rowsAffected = stmt.executeUpdate();
@@ -198,6 +258,7 @@ public class VehicleDAO {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
+            System.err.println("Error updating vehicle status: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -209,8 +270,11 @@ public class VehicleDAO {
 
             stmt.setInt(1, vehicleId);
             stmt.executeUpdate();
+            // Clear from cache
+            imageCache.remove(vehicleId);
             System.out.println("Vehicle deleted.");
         } catch (SQLException e) {
+            System.err.println("Error deleting vehicle: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -220,6 +284,8 @@ public class VehicleDAO {
         try (Connection conn = PostgresConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             int deleted = stmt.executeUpdate();
+            // Clear entire cache
+            imageCache.clear();
             System.out.println("Deleted " + deleted + " vehicles.");
         }
     }

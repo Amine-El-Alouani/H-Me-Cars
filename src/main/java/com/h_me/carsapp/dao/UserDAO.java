@@ -28,6 +28,7 @@ public class UserDAO {
                 return user;
             }
         } catch (SQLException e) {
+            System.err.println("Login validation error: " + e.getMessage());
             e.printStackTrace();
         }
         return null;
@@ -49,6 +50,7 @@ public class UserDAO {
             stmt.executeUpdate();
             return true;
         } catch (SQLException e) {
+            System.err.println("Registration error: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
